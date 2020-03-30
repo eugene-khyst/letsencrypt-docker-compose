@@ -22,7 +22,13 @@ domain_list=($DOMAINS)
 emails_list=($CERTBOT_EMAILS)
 for i in "${!domain_list[@]}"; do
   domain="${domain_list[i]}"
-  echo "Obtaining or renewing the certificate for $domain"
+
+  if [ -d "/etc/letsencrypt/live/$domain" ]; then
+    echo "Let's Encrypt certificate for $domain already exists"
+    continue
+  fi
+
+  echo "Obtaining the certificate for $domain"
 
   if [ -z "${emails_list[i]}" ]; then
     email_arg="--register-unsafely-without-email"
