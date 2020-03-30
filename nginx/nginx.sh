@@ -22,11 +22,7 @@ if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
   openssl dhparam -out /etc/nginx/ssl/ssl-dhparams.pem 2048
 fi
 
-for domain in $DOMAINS; do
-  if inotifywait -e close_write,moved_to "/etc/letsencrypt/live/$domain"; then
-    sed -i "s|/etc/nginx/ssl/$domain|/etc/letsencrypt/live/$domain|g" /etc/nginx/conf.d/default.conf
-    nginx -s reload
-  fi &
-done
+
+(sleep 30s && sed -i "s|/etc/nginx/ssl/|/etc/letsencrypt/live/|g" /etc/nginx/conf.d/default.conf && nginx -s reload)&
 
 exec nginx -g "daemon off;"
