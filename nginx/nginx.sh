@@ -24,14 +24,16 @@ done
 # fi
 
 wait_for_lets_encrypt() {
-  until [ -d "/etc/letsencrypt/live/" ]; do
-    echo "Waiting for Let's Encrypt certificates"
+  until [ -d "/etc/letsencrypt/live/$1" ]; do
+    echo "Waiting for Let's Encrypt certificates for $1"
     sleep 5s & wait ${!}
   done
-  sed -i "s|/etc/nginx/ssl/certs/|/etc/letsencrypt/live/|g" /etc/nginx/conf.d/default.conf
+  sed -i "s|/etc/nginx/ssl/certs/$1|/etc/letsencrypt/live/$1|g" /etc/nginx/conf.d/default.conf
   nginx -s reload
 }
 
-wait_for_lets_encrypt &
+for domain in $DOMAINS; do
+  wait_for_lets_encrypt "$domain" &
+done
 
 exec nginx -g "daemon off;"
