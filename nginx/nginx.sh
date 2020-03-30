@@ -19,10 +19,10 @@ for domain in $DOMAINS; do
   fi
 done
 
-# if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
-#   mkdir -p "/etc/nginx/ssl/dhparams"
-#   openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
-# fi
+if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
+  mkdir -p "/etc/nginx/ssl/dhparams"
+  openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
+fi
 
 use_lets_encrypt_certificates() {
   echo "Switching Nginx to use Let's Encrypt certificate for $1"
