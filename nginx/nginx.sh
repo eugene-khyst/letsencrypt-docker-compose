@@ -19,6 +19,7 @@ for domain in $DOMAINS; do
 done
 
 if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
+  mkdir -p "/etc/nginx/ssl/dhparams"
   openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
 fi
 
