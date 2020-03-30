@@ -18,17 +18,20 @@ for domain in $DOMAINS; do
   fi
 done
 
-if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
-  mkdir -p "/etc/nginx/ssl/dhparams"
-  openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
-fi
+# if [ ! -f /etc/nginx/ssl/ssl-dhparams.pem ]; then
+#   mkdir -p "/etc/nginx/ssl/dhparams"
+#   openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
+# fi
 
-until [ -f /tmp/examplefile.txt ]; do
-  echo "Waiting for Let's Encrypt certificates"
-  sleep 5s & wait ${!}
+wait_for_lets_encrypt() {
+  until [ -d "/etc/letsencrypt/live/" ]; do
+    echo "Waiting for Let's Encrypt certificates"
+    sleep 5s & wait ${!}
+  done
   sed -i "s|/etc/nginx/ssl/certs/|/etc/letsencrypt/live/|g" /etc/nginx/conf.d/default.conf
   nginx -s reload
-done
-echo "File found"
+}
+
+wait_for_lets_encrypt &
 
 exec nginx -g "daemon off;"
