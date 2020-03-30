@@ -27,6 +27,9 @@ done
 use_lets_encrypt_certificates() {
   echo "Switching Nginx to use Let's Encrypt certificate for $1"
   sed -i "s|/etc/nginx/ssl/certs/$1|/etc/letsencrypt/live/$1|g" /etc/nginx/conf.d/default.conf
+}
+
+reload_nginx() {
   echo "Reloading Nginx configuration"
   nginx -s reload
 }
@@ -37,6 +40,7 @@ wait_for_lets_encrypt() {
     sleep 5s & wait ${!}
   done
   use_lets_encrypt_certificates "$1"
+  reload_nginx
 }
 
 for domain in $DOMAINS; do
