@@ -1,6 +1,6 @@
 FROM nginx:1.17-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl inotify-tools
 
 COPY default.conf /etc/nginx/conf.d/
 COPY options-ssl-nginx.conf /etc/nginx/
