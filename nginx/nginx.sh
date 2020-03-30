@@ -24,20 +24,26 @@ done
 #   openssl dhparam -out /etc/nginx/ssl/dhparams/ssl-dhparams.pem 2048
 # fi
 
-wait_for_lets_encrypt() {
-  until [ -d "/etc/letsencrypt/live/$1" ]; do
-    echo "Waiting for Let's Encrypt certificates for $1"
-    sleep 5s & wait ${!}
-  done
-  echo "Switching Nginx to Let's Encrypt certificate"
+use_lets_encrypt_certificates() {
+  echo "Switching Nginx to use Let's Encrypt certificate"
   sed -i "s|/etc/nginx/ssl/certs/$1|/etc/letsencrypt/live/$1|g" /etc/nginx/conf.d/default.conf
   echo "Reloading Nginx configuration"
   nginx -s reload
 }
 
+wait_for_lets_encrypt() {
+  until [ -d "/etc/letsencrypt/live/$1" ]; do
+    echo "Waiting for Let's Encrypt certificates for $1"
+    sleep 5s & wait ${!}
+  done
+  use_lets_encrypt_certificates "$1"
+}
+
 for domain in $DOMAINS; do
   if [ ! -d "/etc/letsencrypt/live/$1" ]; then
     wait_for_lets_encrypt "$domain" &
+  else
+    use_lets_encrypt_certificates "$domain"
   fi
 done
 
