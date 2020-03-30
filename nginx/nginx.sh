@@ -9,6 +9,7 @@ fi
 
 for domain in $DOMAINS; do
   if [ ! -f "/etc/nginx/ssl/certs/$domain/fullchain.pem" ]; then
+    echo "Generating dummy ceritificate for $domain"
     mkdir -p "/etc/nginx/ssl/certs/$domain"
     printf "[dn]\nCN=${domain}\n[req]\ndistinguished_name = dn\n[EXT]\nsubjectAltName=DNS:${domain}, DNS:www.${domain}\nkeyUsage=digitalSignature\nextendedKeyUsage=serverAuth" > openssl.cnf
     openssl req -x509 -out "/etc/nginx/ssl/certs/$domain/fullchain.pem" -keyout "/etc/nginx/ssl/certs/$domain/privkey.pem" \
@@ -28,12 +29,16 @@ wait_for_lets_encrypt() {
     echo "Waiting for Let's Encrypt certificates for $1"
     sleep 5s & wait ${!}
   done
+  echo "Switching Nginx to Let's Encrypt certificate"
   sed -i "s|/etc/nginx/ssl/certs/$1|/etc/letsencrypt/live/$1|g" /etc/nginx/conf.d/default.conf
+  echo "Reloading Nginx configuration"
   nginx -s reload
 }
 
 for domain in $DOMAINS; do
-  wait_for_lets_encrypt "$domain" &
+  if [ ! -d "/etc/letsencrypt/live/$1" ]; then
+    wait_for_lets_encrypt "$domain" &
+  fi
 done
 
 exec nginx -g "daemon off;"
