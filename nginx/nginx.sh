@@ -25,7 +25,7 @@ done
 # fi
 
 use_lets_encrypt_certificates() {
-  echo "Switching Nginx to use Let's Encrypt certificate"
+  echo "Switching Nginx to use Let's Encrypt certificate for $1"
   sed -i "s|/etc/nginx/ssl/certs/$1|/etc/letsencrypt/live/$1|g" /etc/nginx/conf.d/default.conf
   echo "Reloading Nginx configuration"
   nginx -s reload
