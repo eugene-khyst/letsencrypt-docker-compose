@@ -7,3 +7,5 @@ docker-compose up --build
 
 devcomanda.env
 CERTBOT_TEST_CERT=0
+
+A+ rating at https://www.ssllabs.com/ssltest/

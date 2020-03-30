@@ -6,9 +6,9 @@ RUN apk update && \
     pip3 install docker-compose && \
     apk del .docker-compose-deps
 
-COPY renew_certs.sh /etc/periodic/15min/renew_certs
+COPY renew_certs.sh /etc/periodic/daily/renew_certs
 
-RUN chmod +x /etc/periodic/15min/renew_certs
+RUN chmod +x /etc/periodic/daily/renew_certs
 
 WORKDIR /workdir
 
