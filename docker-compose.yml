@@ -5,7 +5,7 @@ services:
     build: ./nginx
     image: devcomanda/nginx
     env_file:
-      - ./devcomanda.env
+      - ./config.env
     volumes:
       - devcomanda_nginx_ssl:/etc/nginx/ssl
       - devcomanda_certbot_certs:/etc/letsencrypt
@@ -22,7 +22,7 @@ services:
     build: ./certbot
     image: devcomanda/certbot
     env_file:
-      - ./devcomanda.env
+      - ./config.env
     volumes:
       - devcomanda_certbot_certs:/etc/letsencrypt
       - test1_devcomanda_com_certbot:/var/www/certbot/test1.devcomanda.com
