@@ -71,6 +71,10 @@ When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CER
 1. [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed
 2. You have a domain name
 3. You have a server with a publicly routable IP address
+4. You have cloned this repository
+   ```bash
+   git clone https://github.com/evgeniy-khist/letsencrypt-docker-compose.git
+   ```
 
 ## Step 0 - Point your domain to server with DNS A records
 
