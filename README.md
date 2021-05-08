@@ -29,7 +29,7 @@ The sequence of actions:
 * Certbot waits for Nginx to become ready and obtains certificates
 * Cron triggers Certbot to try to renew certificates and Nginx to reload configuration on a daily basis
 
-There the following files:
+The directories and files:
 
 * `docker-compose.yml`
 * `.env` - specifies `COMPOSE_PROJECT_NAME` to make container names independent from the base directory name
