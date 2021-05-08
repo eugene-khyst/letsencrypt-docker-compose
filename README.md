@@ -123,7 +123,7 @@ docker volume rm devcomanda_certbot_certs
 docker volume create --name=devcomanda_certbot_certs
 ```
 
-Start containers:
+Start the containers:
 
 ```bash
 docker-compose up
