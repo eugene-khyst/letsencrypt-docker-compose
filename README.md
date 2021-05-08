@@ -104,7 +104,7 @@ docker-compose up --build
 
 ## Step 4 - Switch to production Let's Encrypt server after verifying HTTPS works with test certificates
 
-Stop comtainers:
+Stop the containers:
 
 ```bash
 docker-compose down
