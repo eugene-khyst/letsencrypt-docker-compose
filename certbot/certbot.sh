@@ -23,6 +23,8 @@ emails_list=($CERTBOT_EMAILS)
 for i in "${!domain_list[@]}"; do
   domain="${domain_list[i]}"
 
+  mkdir -p "/var/www/certbot/$domain"
+
   if [ -d "/etc/letsencrypt/live/$domain" ]; then
     echo "Let's Encrypt certificate for $domain already exists"
     continue

@@ -3,16 +3,15 @@ version: "2"
 services:
   nginx:
     build: ./nginx
-    image: devcomanda/nginx
+    image: evgeniy-khyst/nginx
     env_file:
       - ./config.env
     volumes:
-      - devcomanda_nginx_ssl:/etc/nginx/ssl
-      - devcomanda_certbot_certs:/etc/letsencrypt
-      - test1_devcomanda_com_certbot:/var/www/certbot/test1.devcomanda.com
-      - test2_devcomanda_com_certbot:/var/www/certbot/test2.devcomanda.com
-      - ./html:/var/www/html/test1.devcomanda.com
-      - ./html:/var/www/html/test2.devcomanda.com
+      - nginx_conf:/etc/nginx/sites
+      - nginx_ssl:/etc/nginx/ssl
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_acme_challenge:/var/www/certbot
+      - ./html:/var/www/html
     ports:
       - "80:80"
       - "443:443"
@@ -20,19 +19,18 @@ services:
 
   certbot:
     build: ./certbot
-    image: devcomanda/certbot
+    image: evgeniy-khyst/certbot
     env_file:
       - ./config.env
     volumes:
-      - devcomanda_certbot_certs:/etc/letsencrypt
-      - test1_devcomanda_com_certbot:/var/www/certbot/test1.devcomanda.com
-      - test2_devcomanda_com_certbot:/var/www/certbot/test2.devcomanda.com
+      - letsencrypt_certs:/etc/letsencrypt
+      - certbot_acme_challenge:/var/www/certbot
     depends_on:
       - nginx
 
   cron:
     build: ./cron
-    image: devcomanda/cron
+    image: evgeniy-khyst/cron
     environment:
       COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
     volumes:
@@ -43,9 +41,9 @@ services:
       - certbot
 
 volumes:
-  devcomanda_nginx_ssl:
+  nginx_conf:
+  nginx_ssl:
     external: true
-  devcomanda_certbot_certs:
+  letsencrypt_certs:
     external: true
-  test1_devcomanda_com_certbot:
-  test2_devcomanda_com_certbot:
+  certbot_acme_challenge:
