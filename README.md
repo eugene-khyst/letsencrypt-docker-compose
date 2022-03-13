@@ -14,8 +14,8 @@ But for Docker Compose there is no such popular and robust tool for TLS certific
 The example supports separate TLS certificates for multiple domain names, e.g. example.com, anotherdomain.net etc.
 For simplicity this example deals with the following domain names:
 
-* test1.devcomanda.com
-* test2.devcomanda.com
+* test1.evgeniy-khyst.com
+* test2.evgeniy-khyst.com
 
 The idea is simple. There are 3 containers: 
 
@@ -34,13 +34,17 @@ The directories and files:
 * `docker-compose.yml`
 * `.env` - specifies `COMPOSE_PROJECT_NAME` to make container names independent from the base directory name
 * `config.env` - specifies project configuration, e.g. domain names, emails etc.
-* `html/` - directory mounted as `root` for Nginx
-    * `index.html`
+* `html/`
+    * `test1.evgeniy-khyst.com/` - directory mounted as `root` for Nginx server `test1.evgeniy-khyst.com`
+        * `index.html`
+    * `test2.evgeniy-khyst.com/` - directory mounted as `root` for Nginx server `test2.evgeniy-khyst.com`
+        * `index.html`
 * `nginx/`
     * `Dockerfile`
     * `nginx.sh` - entrypoint script
     * `hsts.conf` - HTTP Strict Transport Security (HSTS) policy
-    * `default.conf` - Nginx configuration for all domains. Contains a configuration to get A+ rating at [SSL Server Test](https://www.ssllabs.com/ssltest/)
+    * `default.conf` - Nginx configuration with common settings for all domains. The file is copied to `/etc/nginx/conf.d/`
+    * `site.conf.tpl` - Nginx configuration template. Contains a configuration to get A+ rating at [SSL Server Test](https://www.ssllabs.com/ssltest/). Configuration files based on this template are created as `/etc/nginx/sites/${domain}.conf`. These configuration files are included by `default.conf`
 * `certbot/`
     * `Dockerfile`
     * `certbot.sh` - entrypoint script
@@ -51,8 +55,8 @@ The directories and files:
 To adapt the example to your domain names you need to change only `config.env`:
 
 ```properties
-DOMAINS=test1.devcomanda.com test2.devcomanda.com
-CERTBOT_EMAILS=info@devcomanda.com info@devcomanda.com
+DOMAINS=test1.evgeniy-khyst.com test2.evgeniy-khyst.com
+CERTBOT_EMAILS=info@evgeniy-khyst.com info@evgeniy-khyst.com
 CERTBOT_TEST_CERT=1
 CERTBOT_RSA_KEY_SIZE=4096
 ```
@@ -78,22 +82,31 @@ When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CER
 
 ## Step 0 - Point your domain to server with DNS A records
 
-For all domain names configure DNS A records to point to a server where Docker containers will be running.
+For all domain names configure DNS A records to point to a server where Docker containers will be running and CNAME records for `www` subdomains.
+
+DNS records
+
+| Type | Hostname | Value |
+| --- | --- | --- |
+| A | `test1.evgeniy-khyst.com` | directs to IP address `X.X.X.X` |
+| A | `test2.evgeniy-khyst.com` | directs to IP address `X.X.X.X` |
+| CNAME | `www.test1.evgeniy-khyst.com` | is an alias of `test1.evgeniy-khyst.com` |
+| CNAME | `www.test2.evgeniy-khyst.com` | is an alias of `test2.evgeniy-khyst.com` |
 
 ## Step 1 - Edit domain names and emails in the configuration
 
 Specify you domain names and contact emails for these domains in the `config.env`:
 
 ```properties
-DOMAINS=test1.devcomanda.com test2.devcomanda.com
-CERTBOT_EMAILS=info@devcomanda.com info@devcomanda.com
+DOMAINS=test1.evgeniy-khyst.com test2.evgeniy-khyst.com
+CERTBOT_EMAILS=info@evgeniy-khyst.com info@evgeniy-khyst.com
 ```
 
 ## Step 2 - Create named Docker volumes for dummy and Let's Encrypt TLS certificates
 
 ```bash
-docker volume create --name=devcomanda_nginx_ssl
-docker volume create --name=devcomanda_certbot_certs
+docker volume create --name=nginx_ssl
+docker volume create --name=letsencrypt_certs
 ```
 
 ## Step 3 - Build images and start containers
@@ -119,8 +132,8 @@ CERTBOT_TEST_CERT=0
 Re-create the volume for Let's Encrypt certificates:
 
 ```bash
-docker volume rm devcomanda_certbot_certs
-docker volume create --name=devcomanda_certbot_certs
+docker volume rm letsencrypt_certs
+docker volume create --name=letsencrypt_certs
 ```
 
 Start the containers:
