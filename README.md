@@ -1,20 +1,20 @@
 # Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes
 
 - [Overview](#3b878279a04dc47d60932cb294d96259)
-- [Directory Structure](#3ea4b283eb322e1c6373d63f91d032be)
-- [Configuration File Structure](#4ca1bfef987fafc0bf59774b4e88d407)
-- [Initial Setup](#6641666d7bc2748bab0ac80cdec3a2a3)
+- [Initial setup](#1231369e1218613623e1b520c27ce190)
   - [Prerequisites](#ee68e5b99222bbc29a480fcb0d1d6ee2)
   - [Step 0 - Create DNS records](#288c0835566de0a785d19451eac904a0)
   - [Step 1 - Edit domain names and emails in the configuration](#f24b6b41d1afb4cf65b765cf05a44ac1)
   - [Step 2 - Create named Docker volumes for dummy and Let's Encrypt TLS certificates](#eb07e72448b737f74a22642f6f4948d3)
   - [Step 3 - Build images and start containers](#d29a162d56e4543891fe08143e783c44)
   - [Step 4 - Switch to production Let's Encrypt server after verifying HTTPS works with test certificates](#ecc27bc4675f17370eced9ac6ef645a0)
-- [Adding a New Domain to a Running Solution ](#df4dbc9f0317b0524962bc438bed627b)
+- [Adding a new domain to a running solution ](#46bd5af45bab01bd877d3925e009380d)
   - [Step 0 - Create new DNS records](#916908b9675aac57d95610d559b4fc14)
   - [Step 1 - Add domain name and email to the configuration](#d0a4d4424e2e96c4dbe1a28dfddf7224)
   - [Step 2 - Create a web root and add static content ](#10d817b3643b051e8bf78fd5612912b7)
   - [Step 3 - Restart Docker containers](#38f75935bf20b547d1f6788791645d5d)
+- [Directory structure](#7cd115332ea5785828a7a0b5249f0755)
+- [Configuration file structure](#bcd6f4d91c9b46c9af4d5b8c4a07db77)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
@@ -45,56 +45,11 @@ The idea is simple. There are 3 containers:
 
 The sequence of actions:
 
-* Nginx generates self-signed "dummy" certificates to pass ACME challenge for obtaining Let's Encrypt certificates
-* Certbot waits for Nginx to become ready and obtains certificates
-* Cron triggers Certbot to try to renew certificates and Nginx to reload configuration on a daily basis
+1. Nginx generates self-signed "dummy" certificates to pass ACME challenge for obtaining Let's Encrypt certificates
+2. Certbot waits for Nginx to become ready and obtains certificates
+3. Cron triggers Certbot to try to renew certificates and Nginx to reload configuration on a daily basis
 
-## <a id="3ea4b283eb322e1c6373d63f91d032be"></a>Directory Structure
-
-The directories and files:
-
-* [`docker-compose.yml`](docker-compose.yml)
-* [`.env`](.env) - specifies `COMPOSE_PROJECT_NAME` to make container names independent from the base directory name
-* [`config.env`](config.env) - specifies project configuration, e.g. domain names, emails etc.
-* [`html/`](html/)
-    * [`test1.evgeniy-khyst.com/`](html/test1.evgeniy-khyst.com/) - directory mounted as a web root for Nginx server `test1.evgeniy-khyst.com`
-        * [`index.html`](html/test1.evgeniy-khyst.com/index.html)
-    * [`test2.evgeniy-khyst.com/`](html/test2.evgeniy-khyst.com/) - directory mounted as a web root for Nginx server `test2.evgeniy-khyst.com`
-        * [`index.html`](html/test2.evgeniy-khyst.com/index.html)
-* [`nginx/`](nginx/)
-    * [`Dockerfile`](nginx/Dockerfile)
-    * [`nginx.sh`](nginx/nginx.sh) - entrypoint script
-    * [`hsts.conf`](nginx/hsts.conf) - HTTP Strict Transport Security (HSTS) policy
-    * [`default.conf`](nginx/default.conf) - Nginx configuration with common settings for all domains. The file is copied to `/etc/nginx/conf.d/`
-    * [`site.conf.tpl`](nginx/site.conf.tpl) - Nginx configuration template. Contains a configuration to get A+ rating at [SSL Server Test](https://www.ssllabs.com/ssltest/). Configuration files based on this template are created as `/etc/nginx/sites/${domain}.conf`. These configuration files are included by `default.conf`
-* [`certbot/`](certbot/)
-    * [`Dockerfile`](certbot/Dockerfile)
-    * [`certbot.sh`](certbot/certbot.sh) - entrypoint script
-* [`cron/`](cron/)
-    * [`Dockerfile`](cron/Dockerfile)
-    * [`renew_certs.sh`](cron/renew_certs.sh) - script executed on a daily basis to try to renew certificates
-
-## <a id="4ca1bfef987fafc0bf59774b4e88d407"></a>Configuration File Structure
-
-To adapt the example to your domain names you need to change only [`config.env`](config.env):
-
-```properties
-DOMAINS=test1.evgeniy-khyst.com test2.evgeniy-khyst.com
-CERTBOT_EMAILS=info@evgeniy-khyst.com info@evgeniy-khyst.com
-CERTBOT_TEST_CERT=1
-CERTBOT_RSA_KEY_SIZE=4096
-```
-
-Configuration parameters:
-
-* `DOMAINS` - a space separated list of domains to manage certificates for
-* `CERTBOT_EMAILS` - a space separated list of email for corresponding domains. If not specified, certificates will be obtained with `--register-unsafely-without-email`
-* `CERTBOT_TEST_CERT` - use Let's Encrypt staging server (`--test-cert`)
-
-Let's Encrypt has rate limits. So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
-When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
-
-## <a id="6641666d7bc2748bab0ac80cdec3a2a3"></a>Initial Setup
+## <a id="1231369e1218613623e1b520c27ce190"></a>Initial setup
 
 ### <a id="ee68e5b99222bbc29a480fcb0d1d6ee2"></a>Prerequisites
 
@@ -140,6 +95,7 @@ docker volume create --name=letsencrypt_certs
 
 ```bash
 docker-compose up -d --build
+docker-compose logs -f
 ```
 
 ### <a id="ecc27bc4675f17370eced9ac6ef645a0"></a>Step 4 - Switch to production Let's Encrypt server after verifying HTTPS works with test certificates
@@ -167,9 +123,10 @@ Start the containers:
 
 ```bash
 docker-compose up -d
+docker-compose logs -f
 ```
 
-## <a id="df4dbc9f0317b0524962bc438bed627b"></a>Adding a New Domain to a Running Solution 
+## <a id="46bd5af45bab01bd877d3925e009380d"></a>Adding a new domain to a running solution 
 
 Let's add a third domain `test3.evgeniy-khyst.com` to the running solution.
 
@@ -213,4 +170,50 @@ cp html/test1.evgeniy-khyst.com/index.html html/test3.evgeniy-khyst.com/
 ```bash
 docker-compose down
 docker-compose up -d
+docker-compose logs -f
 ```
+
+## <a id="7cd115332ea5785828a7a0b5249f0755"></a>Directory structure
+
+The directories and files:
+
+* [`docker-compose.yml`](docker-compose.yml)
+* [`.env`](.env) - specifies `COMPOSE_PROJECT_NAME` to make container names independent from the base directory name
+* [`config.env`](config.env) - specifies project configuration, e.g. domain names, emails etc.
+* [`html/`](html/)
+    * [`test1.evgeniy-khyst.com/`](html/test1.evgeniy-khyst.com/) - directory mounted as a web root for Nginx server `test1.evgeniy-khyst.com`
+        * [`index.html`](html/test1.evgeniy-khyst.com/index.html)
+    * [`test2.evgeniy-khyst.com/`](html/test2.evgeniy-khyst.com/) - directory mounted as a web root for Nginx server `test2.evgeniy-khyst.com`
+        * [`index.html`](html/test2.evgeniy-khyst.com/index.html)
+* [`nginx/`](nginx/)
+    * [`Dockerfile`](nginx/Dockerfile)
+    * [`nginx.sh`](nginx/nginx.sh) - entrypoint script
+    * [`hsts.conf`](nginx/hsts.conf) - HTTP Strict Transport Security (HSTS) policy
+    * [`default.conf`](nginx/default.conf) - Nginx configuration with common settings for all domains. The file is copied to `/etc/nginx/conf.d/`
+    * [`site.conf.tpl`](nginx/site.conf.tpl) - Nginx configuration template. Contains a configuration to get A+ rating at [SSL Server Test](https://www.ssllabs.com/ssltest/). Configuration files based on this template are created as `/etc/nginx/sites/${domain}.conf`. These configuration files are included by `default.conf`
+* [`certbot/`](certbot/)
+    * [`Dockerfile`](certbot/Dockerfile)
+    * [`certbot.sh`](certbot/certbot.sh) - entrypoint script
+* [`cron/`](cron/)
+    * [`Dockerfile`](cron/Dockerfile)
+    * [`renew_certs.sh`](cron/renew_certs.sh) - script executed on a daily basis to try to renew certificates
+
+## <a id="bcd6f4d91c9b46c9af4d5b8c4a07db77"></a>Configuration file structure
+
+To adapt the example to your domain names you need to change only [`config.env`](config.env):
+
+```properties
+DOMAINS=test1.evgeniy-khyst.com test2.evgeniy-khyst.com
+CERTBOT_EMAILS=info@evgeniy-khyst.com info@evgeniy-khyst.com
+CERTBOT_TEST_CERT=1
+CERTBOT_RSA_KEY_SIZE=4096
+```
+
+Configuration parameters:
+
+* `DOMAINS` - a space separated list of domains to manage certificates for
+* `CERTBOT_EMAILS` - a space separated list of email for corresponding domains. If not specified, certificates will be obtained with `--register-unsafely-without-email`
+* `CERTBOT_TEST_CERT` - use Let's Encrypt staging server (`--test-cert`)
+
+Let's Encrypt has rate limits. So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
+When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
