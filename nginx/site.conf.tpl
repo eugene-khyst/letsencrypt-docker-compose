@@ -1,6 +1,5 @@
 server {
     listen 80;
-
     server_name ${domain} www.${domain};
 
     location /.well-known/acme-challenge/ {
@@ -13,19 +12,17 @@ server {
 }
 
 server {
-    listen       443 ssl;
-    server_name  ${domain} www.${domain};
+    listen 443 ssl;
+    server_name ${domain} www.${domain};
 
-    ssl_certificate /etc/nginx/ssl/dummy/${domain}/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/dummy/${domain}/privkey.pem;
+    ssl_certificate /etc/nginx/sites/ssl/dummy/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/nginx/sites/ssl/dummy/${domain}/privkey.pem;
 
-    include /etc/nginx/options-ssl-nginx.conf;
+    include /etc/nginx/includes/options-ssl-nginx.conf;
 
-    ssl_dhparam /etc/nginx/ssl/ssl-dhparams.pem;
+    ssl_dhparam /etc/nginx/sites/ssl/ssl-dhparams.pem;
 
-    include /etc/nginx/hsts.conf;
+    include /etc/nginx/includes/hsts.conf;
 
-    location / {
-        root     /var/www/html/${domain};
-    }
+    include /etc/nginx/vhosts/${domain}.conf;
 }
