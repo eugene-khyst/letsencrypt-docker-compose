@@ -1,10 +1,9 @@
-FROM nginx:1.17-alpine
+FROM nginx:1.21-alpine
 
 RUN apk add --no-cache openssl
 
 COPY default.conf /etc/nginx/conf.d/
-COPY options-ssl-nginx.conf /etc/nginx/
-COPY hsts.conf /etc/nginx/
+COPY gzip.conf options-ssl-nginx.conf hsts.conf /etc/nginx/includes/
 COPY site.conf.tpl /customization/
 COPY nginx.sh /customization/
 

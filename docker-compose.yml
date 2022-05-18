@@ -8,14 +8,14 @@ services:
       - ./config.env
     volumes:
       - nginx_conf:/etc/nginx/sites
-      - nginx_ssl:/etc/nginx/ssl
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
+      - ./vhosts:/etc/nginx/vhosts
       - ./html:/var/www/html
     ports:
       - "80:80"
       - "443:443"
-    restart: always
+    restart: unless-stopped
 
   certbot:
     build: ./certbot
@@ -25,8 +25,6 @@ services:
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
-    depends_on:
-      - nginx
 
   cron:
     build: ./cron
@@ -36,13 +34,10 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workdir:ro
-    depends_on:
-      - nginx
-      - certbot
+    restart: unless-stopped
 
 volumes:
   nginx_conf:
-  nginx_ssl:
     external: true
   letsencrypt_certs:
     external: true
