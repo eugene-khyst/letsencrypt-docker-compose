@@ -213,7 +213,7 @@ Optionally check your domains with [SSL Labs SSL Server Test](https://www.ssllab
 
 ## <a id="45a36b34f024f33bed82349e9096051a"></a>Reloading Nginx configuration without downtime
 
-Update configuration in `vhosts/${domain}.conf`.
+Update a configuration in `vhosts/${domain}.conf`.
 
 Do a hot reload of the Nginx configuration:
 
