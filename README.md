@@ -84,14 +84,21 @@ Also, consider creating CNAME records for the `www` subdomains.
 
 ### <a id="f24b6b41d1afb4cf65b765cf05a44ac1"></a>Step 1 - Edit domain names and emails in the configuration
 
-Specify your domain names and contact emails for these domains in the [`config.env`](config.env):
+Specify your domain names and contact emails for these domains with space as delimiter in the [`config.env`](config.env):
 
 ```bash
 DOMAINS="test1.evgeniy-khyst.com test2.evgeniy-khyst.com"
 CERTBOT_EMAILS="info@evgeniy-khyst.com info@evgeniy-khyst.com"
 ```
 
-Always use double quotes around the `DOMAINS` and `CERTBOT_EMAILS` variables.
+For two and more domains separated by space use double quotes (`"`) around the `DOMAINS` and `CERTBOT_EMAILS` variables.
+
+For a single domain double quotes can be omitted:
+
+```bash
+DOMAINS=test1.evgeniy-khyst.com
+CERTBOT_EMAILS=info@evgeniy-khyst.com
+```
 
 ### <a id="3414177b596079dbf39b1b7fa10234c6"></a>Step 2 - Configure Nginx virtual hosts
 
