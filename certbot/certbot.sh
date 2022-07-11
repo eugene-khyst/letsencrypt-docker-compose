@@ -18,8 +18,10 @@ if [ "$CERTBOT_TEST_CERT" != "0" ]; then
   test_cert_arg="--test-cert"
 fi
 
-domain_list=($DOMAINS)
-emails_list=($CERTBOT_EMAILS)
+domains_fixed=$(echo "$DOMAINS" | tr -d \")
+domain_list=($domains_fixed)
+emails_fixed=$(echo "$CERTBOT_EMAILS" | tr -d \")
+emails_list=($emails_fixed)
 for i in "${!domain_list[@]}"; do
   domain="${domain_list[i]}"
 
