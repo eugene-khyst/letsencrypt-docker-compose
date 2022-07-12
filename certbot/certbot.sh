@@ -18,8 +18,10 @@ if [ "$CERTBOT_TEST_CERT" != "0" ]; then
   test_cert_arg="--test-cert"
 fi
 
-domain_list=($DOMAINS)
-emails_list=($CERTBOT_EMAILS)
+domains_fixed=$(echo "$DOMAINS" | tr -d \")
+domain_list=($domains_fixed)
+emails_fixed=$(echo "$CERTBOT_EMAILS" | tr -d \")
+emails_list=($emails_fixed)
 for i in "${!domain_list[@]}"; do
   domain="${domain_list[i]}"
 
@@ -30,12 +32,13 @@ for i in "${!domain_list[@]}"; do
     continue
   fi
 
-  echo "Obtaining the certificate for $domain"
-
-  if [ -z "${emails_list[i]}" ]; then
+  email="${emails_list[i]}"
+  if [ -z "$email" ]; then
     email_arg="--register-unsafely-without-email"
+    echo "Obtaining the certificate for $domain without email"
   else
-    email_arg="--email ${emails_list[i]}"
+    email_arg="--email $email"
+    echo "Obtaining the certificate for $domain with email $email"
   fi
 
   certbot certonly \
@@ -46,5 +49,6 @@ for i in "${!domain_list[@]}"; do
     $email_arg \
     --rsa-key-size "${CERTBOT_RSA_KEY_SIZE:-4096}" \
     --agree-tos \
-    --noninteractive || true
+    --noninteractive \
+    --verbose || true
 done
