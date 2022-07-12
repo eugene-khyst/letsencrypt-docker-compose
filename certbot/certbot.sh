@@ -51,5 +51,5 @@ for i in "${!domain_list[@]}"; do
     --preferred-challenges http \
     --agree-tos \
     --noninteractive \
-    --verbose || true
+    -vv || true
 done
