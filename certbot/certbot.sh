@@ -32,12 +32,13 @@ for i in "${!domain_list[@]}"; do
     continue
   fi
 
-  echo "Obtaining the certificate for $domain"
-
-  if [ -z "${emails_list[i]}" ]; then
+  email="${emails_list[i]}"
+  if [ -z "$email" ]; then
     email_arg="--register-unsafely-without-email"
+    echo "Obtaining the certificate for $domain without email"
   else
-    email_arg="--email ${emails_list[i]}"
+    email_arg="--email $email"
+    echo "Obtaining the certificate for $domain with email $email"
   fi
 
   certbot certonly \
