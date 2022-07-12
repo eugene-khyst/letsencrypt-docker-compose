@@ -48,8 +48,7 @@ for i in "${!domain_list[@]}"; do
     $test_cert_arg \
     $email_arg \
     --rsa-key-size "${CERTBOT_RSA_KEY_SIZE:-4096}" \
-    --preferred-challenges http \
     --agree-tos \
     --noninteractive \
-    -vv || true
+    --verbose || true
 done
