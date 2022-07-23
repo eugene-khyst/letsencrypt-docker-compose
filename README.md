@@ -160,8 +160,8 @@ docker volume create --name=letsencrypt_certs
 ### <a id="4952d0670f6fb00a0337d2251621508a"></a>Step 4 - Build images and start containers using staging Let's Encrypt server
 
 ```bash
-docker compose up -d --build
-docker compose logs -f
+docker-compose up -d --build
+docker-compose logs -f
 ```
 
 You can alternatively use the `docker-compose` binary.
