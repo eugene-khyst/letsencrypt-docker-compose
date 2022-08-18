@@ -331,3 +331,8 @@ Read more about the best practices and rating:
 
 - https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
 - https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
+
+
+### Infrastructure model
+
+![Infrastructure model](.infragenie/infrastructure_model.png)
