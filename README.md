@@ -22,6 +22,10 @@
 - [Directory structure](#7cd115332ea5785828a7a0b5249f0755)
 - [Configuration file structure](#bcd6f4d91c9b46c9af4d5b8c4a07db77)
 - [SSL configuration for A+ rating](#f9987558925ac3a1ca42e184e10d7b73)
+- [Removing a domain name from a running solution](#90d955c4-2684-11ed-a261-0242ac120002)
+  - [Step 1 - Remove the .conf file](#90d9588a-2684-11ed-a261-0242ac120002)
+  - [Step 2 - Remove domain name](#90d959b6-2684-11ed-a261-0242ac120002)
+  - [Step 3 - Update Docker containers](#90d95ace-2684-11ed-a261-0242ac120002)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
@@ -331,3 +335,22 @@ Read more about the best practices and rating:
 
 - https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
 - https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
+
+## <a id="90d955c4-2684-11ed-a261-0242ac120002"></a>Removing a domain name from a running solution
+
+### <a id="90d9588a-2684-11ed-a261-0242ac120002"></a>Step 1 - Remove the `.conf` file
+
+Remove the `domain.to.remove.com.conf` file from `vhost`
+
+### <a id="90d959b6-2684-11ed-a261-0242ac120002"></a>Step 2 - Remove domain name
+
+Remove the domain name from [`config.env`](config.env)
+
+### <a id="90d95ace-2684-11ed-a261-0242ac120002"></a>Step 3 - Update Docker containers 
+
+```bash
+docker compose down
+docker volume rm nginx_conf
+docker volume create --name=nginx_conf
+docker compose up -d
+```
