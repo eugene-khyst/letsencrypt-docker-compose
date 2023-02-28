@@ -4,14 +4,13 @@ services:
   nginx:
     build: ./nginx
     image: evgeniy-khyst/nginx
-    env_file:
-      - ./config.env
     volumes:
       - nginx_conf:/etc/nginx/sites
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
-      - ./vhosts:/etc/nginx/vhosts
-      - ./html:/var/www/html
+      - ./config.json:/etc/letsencrypt-docker-compose/config.json:ro
+      - ./vhosts:/etc/nginx/vhosts:ro
+      - ./html:/var/www/html:ro
     ports:
       - "80:80"
       - "443:443"
@@ -20,11 +19,10 @@ services:
   certbot:
     build: ./certbot
     image: evgeniy-khyst/certbot
-    env_file:
-      - ./config.env
     volumes:
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
+      - ./config.json:/etc/letsencrypt-docker-compose/config.json:ro
 
   cron:
     build: ./cron
@@ -36,9 +34,13 @@ services:
       - ./:/workdir:ro
     restart: unless-stopped
 
+  # Replace with your backend image or remove
+  example-backend:
+    build: ./examples/nodejs-backend
+    image: evgeniy-khyst/expressjs-helloworld
+    restart: unless-stopped
+
 volumes:
   nginx_conf:
-    external: true
   letsencrypt_certs:
-    external: true
   certbot_acme_challenge:

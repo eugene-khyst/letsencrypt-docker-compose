@@ -4,8 +4,11 @@ set -e
 
 trap exit INT TERM
 
-if [ -z "$DOMAINS" ]; then
-  echo "DOMAINS environment variable is not set"
+config="/etc/letsencrypt-docker-compose/config.json"
+domains_length=$(jq -r '.domains' $config | jq length)
+
+if [ -z "$domains_length" = "0" ]; then
+  echo "Domains are not configured"
   exit 1;
 fi
 
@@ -14,16 +17,17 @@ until nc -z nginx 80; do
   sleep 5s & wait ${!}
 done
 
-if [ "$CERTBOT_TEST_CERT" != "0" ]; then
-  test_cert_arg="--test-cert"
-fi
+for i in $(seq 0 $(($domains_length-1))); do
+  domain=$(jq -r ".domains[$i].domain" $config)
+  www_subdomain=$(jq -r ".domains[$i].wwwSubdomain" $config)
+  email=$(jq -r ".domains[$i].email" $config)
+  test_cert=$(jq -r ".domains[$i].testCert" $config)
+  rsa_key_size=$(jq -r ".domains[$i].rsaKeySize" $config)
 
-domains_fixed=$(echo "$DOMAINS" | tr -d \")
-domain_list=($domains_fixed)
-emails_fixed=$(echo "$CERTBOT_EMAILS" | tr -d \")
-emails_list=($emails_fixed)
-for i in "${!domain_list[@]}"; do
-  domain="${domain_list[i]}"
+  if [ -z "$domain" ]; then
+    echo "Domain name is not configured"
+    exit 1;
+  fi
 
   mkdir -p "/var/www/certbot/$domain"
 
@@ -32,7 +36,14 @@ for i in "${!domain_list[@]}"; do
     continue
   fi
 
-  email="${emails_list[i]}"
+  if [ "$www_subdomain" != "0" ]; then
+    www_subdomain_arg="-d \"www.$domain\""
+  fi
+
+  if [ "$test_cert" != "0" ]; then
+    test_cert_arg="--test-cert"
+  fi
+
   if [ -z "$email" ]; then
     email_arg="--register-unsafely-without-email"
     echo "Obtaining the certificate for $domain without email"
@@ -44,10 +55,11 @@ for i in "${!domain_list[@]}"; do
   certbot certonly \
     --webroot \
     -w "/var/www/certbot/$domain" \
-    -d "$domain" -d "www.$domain" \
+    -d "$domain" \
+    $www_subdomain_arg \
     $test_cert_arg \
     $email_arg \
-    --rsa-key-size "${CERTBOT_RSA_KEY_SIZE:-4096}" \
+    --rsa-key-size "${rsa_key_size:-2048}" \
     --agree-tos \
     --noninteractive \
     --verbose || true

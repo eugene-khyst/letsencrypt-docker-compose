@@ -1,3 +1,10 @@
+# To use Nginx as an HTTP load balancer, uncomment the upstream block below.
+#
+#upstream backend {
+#    server backend1.example.com:8080;
+#    server backend2.example.com:8080;
+#}
+
 server {
     listen 80;
     server_name ${domain} www.${domain};

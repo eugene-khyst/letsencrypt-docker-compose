@@ -1,6 +1,6 @@
 FROM nginx:1.23-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl jq
 
 COPY default.conf /etc/nginx/conf.d/
 COPY gzip.conf options-ssl-nginx.conf hsts.conf /etc/nginx/includes/

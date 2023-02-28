@@ -31,14 +31,14 @@
 
 ## <a id="3b878279a04dc47d60932cb294d96259"></a>Overview
 
-This example automatically obtains and renews [Let's Encrypt](https://letsencrypt.org/) TLS certificates and sets up HTTPS in Nginx for multiple domain names using Docker Compose.
+This example automatically obtains and renews [Let's Encrypt](https://letsencrypt.org/) free SSL/TLS certificates and sets up HTTPS in Nginx for multiple domain names using Docker Compose.
 
 You can set up HTTPS in Nginx with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) by changing a few configuration parameters of this example.
 
 Let's Encrypt is a certificate authority that provides free X.509 certificates for TLS encryption.
 The certificates are valid for 90 days and can be renewed. Both initial creation and renewal can be automated using [Certbot](https://certbot.eff.org/).
 
-When using Kubernetes Let's Encrypt TLS certificates can be easily obtained and installed using [Cert Manager](https://cert-manager.io/).
+When using Kubernetes Let's Encrypt TLS certificates can be easily obtained and installed using cloud native certificate management solutions.
 For simple websites and applications, Kubernetes is too much overhead and Docker Compose is more suitable.
 But for Docker Compose there is no such popular and robust tool for TLS certificate management.
 
@@ -75,7 +75,6 @@ The sequence of actions:
 ### <a id="288c0835566de0a785d19451eac904a0"></a>Step 0 - Create DNS records
 
 For all domain names create DNS A records to point to a server where Docker containers will be running.
-Also, consider creating CNAME records for the `www` subdomains.
 
 **DNS records**
 
@@ -83,8 +82,21 @@ Also, consider creating CNAME records for the `www` subdomains.
 | ----- | ----------------------------- | ---------------------------------------- |
 | A     | `test1.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
 | A     | `test2.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
+
+Also, create CNAME records for the `www` subdomains if needed.
+
+**DNS records**
+
+| Type  | Hostname                      | Value                                    |
+| ----- | ----------------------------- | ---------------------------------------- |
 | CNAME | `www.test1.evgeniy-khyst.com` | is an alias of `test1.evgeniy-khyst.com` |
 | CNAME | `www.test2.evgeniy-khyst.com` | is an alias of `test2.evgeniy-khyst.com` |
+
+If you don't need the `www` subdomains, disable certificate management for them in the [`config.env`](config.env):
+
+```bash
+WWW_SUBDOMAIN=0
+```
 
 ### <a id="f24b6b41d1afb4cf65b765cf05a44ac1"></a>Step 1 - Edit domain names and emails in the configuration
 
@@ -238,13 +250,20 @@ Let's add a third domain `test3.evgeniy-khyst.com` to a running solution.
 
 ### <a id="22e1d8b6115f1b1aaf65d61ee2557e52"></a>Step 0 - Create a new DNS records
 
-Create DNS A record and CNAME record for `www` subdomain.
+Create DNS A record.
 
 **DNS records**
 
 | Type  | Hostname                      | Value                                    |
 | ----- | ----------------------------- | ---------------------------------------- |
 | A     | `test3.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
+
+Also, create CNAME record for `www` subdomain if needed.
+
+**DNS records**
+
+| Type  | Hostname                      | Value                                    |
+| ----- | ----------------------------- | ---------------------------------------- |
 | CNAME | `www.test3.evgeniy-khyst.com` | is an alias of `test3.evgeniy-khyst.com` |
 
 ### <a id="d0a4d4424e2e96c4dbe1a28dfddf7224"></a>Step 1 - Add domain name and email to the configuration
@@ -313,6 +332,7 @@ To adapt the example to your domain names you need to change only [`config.env`]
 
 ```properties
 DOMAINS="test1.evgeniy-khyst.com test2.evgeniy-khyst.com"
+WWW_SUBDOMAIN=1
 CERTBOT_EMAILS="info@evgeniy-khyst.com info@evgeniy-khyst.com"
 CERTBOT_TEST_CERT=1
 CERTBOT_RSA_KEY_SIZE=4096
@@ -321,11 +341,14 @@ CERTBOT_RSA_KEY_SIZE=4096
 Configuration parameters:
 
 - `DOMAINS` - a space separated list of domains to manage certificates for
+- `WWW_SUBDOMAIN` - manage certificates for the `www` subdomain.
+    To obtain and renew the certificate for the `www.example.com` subdomain along with the `example.com` domain, set `WWW_SUBDOMAIN=1` (default value).
+    If you don't need the `www` subdomains, disable certificate management for them by setting `WWW_SUBDOMAIN=0`.
 - `CERTBOT_EMAILS` - a space separated list of email for corresponding domains. If not specified, certificates will be obtained with `--register-unsafely-without-email`
-- `CERTBOT_TEST_CERT` - use Let's Encrypt staging server (`--test-cert`)
-
-Let's Encrypt has rate limits. So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
-When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
+- `CERTBOT_TEST_CERT` - use Let's Encrypt staging server (`--test-cert`).
+    Let's Encrypt has rate limits. 
+    So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
+    When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
 
 ## <a id="f9987558925ac3a1ca42e184e10d7b73"></a>SSL configuration for A+ rating
 

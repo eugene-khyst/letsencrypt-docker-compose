@@ -1,0 +1,18 @@
+{
+  "domains": [
+    { 
+      "domain": "a.evgeniy-khyst.com", 
+      "email": "info@evgeniy-khyst.com", 
+      "wwwSubdomain": false,
+      "testCert": true,
+      "rsaKeySize": 4096
+    },
+    { 
+      "domain": "b.evgeniy-khyst.com", 
+      "email": "info@evgeniy-khyst.com", 
+      "wwwSubdomain": true,
+      "testCert": true,
+      "rsaKeySize": 4096
+    }
+  ]
+}

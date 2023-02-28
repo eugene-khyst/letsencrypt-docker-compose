@@ -2,8 +2,11 @@
 
 set -e
 
-if [ -z "$DOMAINS" ]; then
-  echo "DOMAINS environment variable is not set"
+config="/etc/letsencrypt-docker-compose/config.json"
+domains=$(jq -r '.domains[].domain' $config)
+
+if [ -z "$domains" ]; then
+  echo "Domains are not configured"
   exit 1;
 fi
 
@@ -40,8 +43,7 @@ if [ ! -f /etc/nginx/sites/ssl/ssl-dhparams.pem ]; then
   openssl dhparam -out /etc/nginx/sites/ssl/ssl-dhparams.pem 2048
 fi
 
-domains_fixed=$(echo "$DOMAINS" | tr -d \")
-for domain in $domains_fixed; do
+for domain in $domains; do
   echo "Checking configuration for $domain"
 
   if [ ! -f "/etc/nginx/sites/$domain.conf" ]; then
