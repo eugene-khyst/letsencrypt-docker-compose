@@ -28,10 +28,10 @@ services:
       - "443:443"
     healthcheck:
       test: ["CMD", "nc", "-z", "nginx", "80"]
-      interval: 30s
+      interval: 10s
       timeout: 30s
       start_period: 30s
-      retries: 5
+      retries: 10
     restart: unless-stopped
 
   certbot:

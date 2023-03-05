@@ -78,10 +78,10 @@ For all domain names create DNS A records to point to a server where Docker cont
 
 **DNS records**
 
-| Type  | Hostname                      | Value                                    |
-| ----- | ----------------------------- | ---------------------------------------- |
-| A     | `test1.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
-| A     | `test2.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
+| Type | Hostname                  | Value                           |
+| ---- | ------------------------- | ------------------------------- |
+| A    | `test1.evgeniy-khyst.com` | directs to IP address `X.X.X.X` |
+| A    | `test2.evgeniy-khyst.com` | directs to IP address `X.X.X.X` |
 
 Also, create CNAME records for the `www` subdomains if needed.
 
@@ -254,9 +254,9 @@ Create DNS A record.
 
 **DNS records**
 
-| Type  | Hostname                      | Value                                    |
-| ----- | ----------------------------- | ---------------------------------------- |
-| A     | `test3.evgeniy-khyst.com`     | directs to IP address `X.X.X.X`          |
+| Type | Hostname                  | Value                           |
+| ---- | ------------------------- | ------------------------------- |
+| A    | `test3.evgeniy-khyst.com` | directs to IP address `X.X.X.X` |
 
 Also, create CNAME record for `www` subdomain if needed.
 
@@ -342,13 +342,13 @@ Configuration parameters:
 
 - `DOMAINS` - a space separated list of domains to manage certificates for
 - `WWW_SUBDOMAIN` - manage certificates for the `www` subdomain.
-    To obtain and renew the certificate for the `www.example.com` subdomain along with the `example.com` domain, set `WWW_SUBDOMAIN=1` (default value).
-    If you don't need the `www` subdomains, disable certificate management for them by setting `WWW_SUBDOMAIN=0`.
+  To obtain and renew the certificate for the `www.example.com` subdomain along with the `example.com` domain, set `WWW_SUBDOMAIN=1` (default value).
+  If you don't need the `www` subdomains, disable certificate management for them by setting `WWW_SUBDOMAIN=0`.
 - `CERTBOT_EMAILS` - a space separated list of email for corresponding domains. If not specified, certificates will be obtained with `--register-unsafely-without-email`
 - `CERTBOT_TEST_CERT` - use Let's Encrypt staging server (`--test-cert`).
-    Let's Encrypt has rate limits. 
-    So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
-    When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
+  Let's Encrypt has rate limits.
+  So, while testing it's better to use staging server by setting `CERTBOT_TEST_CERT=1` (default value).
+  When you are ready to use production Let's Encrypt server, set `CERTBOT_TEST_CERT=0`.
 
 ## <a id="f9987558925ac3a1ca42e184e10d7b73"></a>SSL configuration for A+ rating
 
@@ -369,7 +369,7 @@ Remove the `domain.to.remove.com.conf` file from `vhost`
 
 Remove the domain name from [`config.env`](config.env)
 
-### <a id="90d95ace-2684-11ed-a261-0242ac120002"></a>Step 3 - Update Docker containers 
+### <a id="90d95ace-2684-11ed-a261-0242ac120002"></a>Step 3 - Update Docker containers
 
 ```bash
 docker compose down
@@ -377,3 +377,7 @@ docker volume rm nginx_conf
 docker volume create --name=nginx_conf
 docker compose up -d
 ```
+
+docker compose run --rm --no-deps --entrypoint certbot certbot -n delete --cert-name b.evgeniy-khyst.com
+
+docker compose run --rm --no-deps --entrypoint certbot certbot renew --no-random-sleep-on-renew --force-renew
