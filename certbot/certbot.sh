@@ -28,7 +28,7 @@ for domain in $domains; do
   fi
 
   if [ "$www_subdomain" = "true" ]; then
-    www_subdomain_arg="-d \"www.${domain}\""
+    www_subdomain_arg="-d www.${domain}"
     echo "A 'www' subdomain enabled"
   fi
 
