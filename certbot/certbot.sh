@@ -1,66 +1,65 @@
-#!/bin/bash
+#!/bin/sh
 
 set -e
 
 trap exit INT TERM
 
-config="/etc/letsencrypt-docker-compose/config.json"
-domains_length=$(jq -r '.domains' $config | jq length)
+config="/letsencrypt-docker-compose/config.json"
+domains=$(jq -r '.domains[].domain' $config)
 
-if [ -z "$domains_length" = "0" ]; then
+if [ -z "$domains" ]; then
   echo "Domains are not configured"
   exit 1;
 fi
 
-until nc -z nginx 80; do
-  echo "Waiting for nginx to start..."
-  sleep 5s & wait ${!}
-done
+for domain in $domains; do
+  echo "Obtaining the certificate for domain $domain"
 
-for i in $(seq 0 $(($domains_length-1))); do
-  domain=$(jq -r ".domains[$i].domain" $config)
-  www_subdomain=$(jq -r ".domains[$i].wwwSubdomain" $config)
-  email=$(jq -r ".domains[$i].email" $config)
-  test_cert=$(jq -r ".domains[$i].testCert" $config)
-  rsa_key_size=$(jq -r ".domains[$i].rsaKeySize" $config)
+  www_subdomain=$(jq -r --arg domain "$domain" '.domains[] | select(.domain == $domain) | .wwwSubdomain' $config)
+  email=$(jq -r --arg domain "$domain" '.domains[] | select(.domain == $domain) | .email' $config)
+  test_cert=$(jq -r --arg domain "$domain" '.domains[] | select(.domain == $domain) | .testCert' $config)
+  rsa_key_size=$(jq -r --arg domain "$domain" '.domains[] | select(.domain == $domain) | .rsaKeySize' $config)
 
-  if [ -z "$domain" ]; then
-    echo "Domain name is not configured"
-    exit 1;
-  fi
+  mkdir -p "/var/www/certbot/${domain}"
 
-  mkdir -p "/var/www/certbot/$domain"
-
-  if [ -d "/etc/letsencrypt/live/$domain" ]; then
-    echo "Let's Encrypt certificate for $domain already exists"
+  if [ -d "/etc/letsencrypt/live/${domain}" ]; then
+    echo "Let's Encrypt certificate for ${domain} already exists"
     continue
   fi
 
-  if [ "$www_subdomain" != "0" ]; then
-    www_subdomain_arg="-d \"www.$domain\""
+  if [ "$www_subdomain" = "true" ]; then
+    www_subdomain_arg="-d \"www.${domain}\""
+    echo "A 'www' subdomain enabled"
   fi
 
-  if [ "$test_cert" != "0" ]; then
+  if [ "$test_cert" = "true" ]; then
     test_cert_arg="--test-cert"
+    echo "Testing on staging environment enabled"
   fi
 
   if [ -z "$email" ]; then
     email_arg="--register-unsafely-without-email"
-    echo "Obtaining the certificate for $domain without email"
+    echo "Registering unsafely without email"
   else
     email_arg="--email $email"
-    echo "Obtaining the certificate for $domain with email $email"
+    echo "Using email ${email}"
   fi
 
-  certbot certonly \
-    --webroot \
-    -w "/var/www/certbot/$domain" \
-    -d "$domain" \
-    $www_subdomain_arg \
-    $test_cert_arg \
-    $email_arg \
-    --rsa-key-size "${rsa_key_size:-2048}" \
-    --agree-tos \
-    --noninteractive \
-    --verbose || true
+  echo "RSA key size is ${rsa_key_size}"
+
+  if [ "$DRY_RUN" = "true" ]; then
+    echo "Dry run is enabled"
+  else
+    certbot certonly \
+      --webroot \
+      -w "/var/www/certbot/${domain}" \
+      -d "$domain" \
+      $www_subdomain_arg \
+      $test_cert_arg \
+      $email_arg \
+      --rsa-key-size "${rsa_key_size}" \
+      --agree-tos \
+      --noninteractive \
+      --verbose || true
+  fi
 done

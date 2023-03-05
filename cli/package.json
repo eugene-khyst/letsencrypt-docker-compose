@@ -7,21 +7,21 @@
   "scripts": {
     "format": "prettier --write . && eslint --fix"
   },
-  "author": "Evgeniy Khyst",
+  "author": "Eugene Khyst",
   "license": "Apache-2.0",
   "bugs": {
-    "url": "https://github.com/evgeniy-khist/markdown-toc/issues"
+    "url": "https://github.com/evgeniy-khist/letsencrypt-docker-compose/issues"
   },
-  "homepage": "https://github.com/evgeniy-khist/markdown-toc#readme",
+  "homepage": "https://github.com/evgeniy-khist/letsencrypt-docker-compose#readme",
   "devDependencies": {
-    "eslint": "8.20.0",
+    "eslint": "8.35.0",
     "eslint-config-airbnb-base": "15.0.0",
-    "eslint-config-prettier": "8.5.0",
-    "eslint-plugin-import": "2.26.0",
-    "prettier": "2.7.1"
+    "eslint-config-prettier": "8.6.0",
+    "eslint-plugin-import": "2.27.5",
+    "prettier": "2.8.4"
   },
   "dependencies": {
-    "dotenv": "16.0.1",
-    "inquirer": "9.0.2"
+    "handlebars": "^4.7.7",
+    "inquirer": "9.1.4"
   }
 }

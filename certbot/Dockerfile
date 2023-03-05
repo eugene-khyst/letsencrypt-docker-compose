@@ -1,6 +1,6 @@
-FROM certbot/certbot:v1.29.0
+FROM certbot/certbot:v1.32.2
 
-RUN apk add --no-cache bash jq
+RUN apk add --no-cache jq
 
 COPY certbot.sh /opt/
 

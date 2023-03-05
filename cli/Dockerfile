@@ -1,7 +1,8 @@
-FROM node:16-alpine
-WORKDIR /usr/src/app
+FROM node:18-alpine
+WORKDIR /letsencrypt-docker-compose/cli
 COPY package*.json ./
 RUN npm ci --only=production
 COPY . .
 ENV NODE_ENV=production
-# CMD ["node", "server.js"]
+WORKDIR /workdir
+CMD ["node", "/letsencrypt-docker-compose/cli/src/app.js"]
