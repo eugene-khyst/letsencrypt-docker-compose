@@ -41,25 +41,21 @@ reload_nginx() {
 }
 
 use_dummy_certificate() {
-  if grep -q "${letsencrypt_certs_dir}/live/${1}" "${nginx_conf_dir}/${1}.conf"; then
-    echo "Switching Nginx to use dummy certificate for $1"
-    cat <<EOF > "${nginx_conf_dir}/${1}.conf"
+  echo "Switching Nginx to use dummy certificate for $1"
+  cat <<EOF > "${nginx_conf_dir}/${1}.conf"
 ssl_certificate ${nginx_conf_dir}/dummy/${1}/fullchain.pem;
 ssl_certificate_key ${nginx_conf_dir}/dummy/${1}/privkey.pem;
 EOF
-    reload_nginx
-  fi
+  reload_nginx
 }
 
 use_lets_encrypt_certificate() {
-  if grep -q "${nginx_conf_dir}/dummy/${1}" "${nginx_conf_dir}/${1}.conf"; then
-    echo "Switching Nginx to use Let's Encrypt certificate for $1"
-    cat <<EOF > "${nginx_conf_dir}/${1}.conf"
+  echo "Switching Nginx to use Let's Encrypt certificate for $1"
+  cat <<EOF > "${nginx_conf_dir}/${1}.conf"
 ssl_certificate ${letsencrypt_certs_dir}/live/${1}/fullchain.pem;
 ssl_certificate_key ${letsencrypt_certs_dir}/live/${1}/privkey.pem;
 EOF
-    reload_nginx
-  fi
+  reload_nginx
 }
 
 echo "Configuring domains:"
