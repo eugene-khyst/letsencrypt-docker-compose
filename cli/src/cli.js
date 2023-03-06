@@ -11,8 +11,7 @@ import {
   forceRenewCertbotCertificate,
   isNginxServiceRunning,
   reloadNginxConfig,
-  restartNginx,
-  stopNginx,
+  runConfigNginx,
 } from './shell-commands.js';
 
 const askDomain = async (config, domainName) => {
@@ -203,9 +202,6 @@ const initConfig = async (config) => {
   await askNginxConfig(config);
   if (await askConfim()) {
     await writeConfigFiles(config);
-    if (await isNginxServiceRunning()) {
-      await restartNginx();
-    }
   }
 };
 
@@ -220,10 +216,10 @@ const obtainProductionCertificates = async (config) => {
 
   if (await askConfim()) {
     await writeConfigFiles(config);
-    await stopNginx();
     await deleteCertbotCertificate(domainName);
-    await restartNginx();
-    await createAndStartCertbot();
+    await runConfigNginx(); // Use dummy certificate
+    await createAndStartCertbot(); // Obtain Let's Encrypt certificate
+    await runConfigNginx(); // Use Let's Encrypt certificate
   }
 };
 
@@ -231,8 +227,9 @@ const addDomains = async (config) => {
   await askDomain(config);
   if (await askConfim()) {
     await writeConfigFiles(config);
-    await restartNginx();
-    await createAndStartCertbot();
+    await runConfigNginx(); // Use dummy certificate
+    await createAndStartCertbot(); // Obtain Let's Encrypt certificate
+    await runConfigNginx(); // Use Let's Encrypt certificate
   }
 };
 

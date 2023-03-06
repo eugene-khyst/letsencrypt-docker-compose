@@ -4,8 +4,8 @@ RUN apk add --no-cache openssl jq
 
 WORKDIR /letsencrypt-docker-compose
 
-COPY init-nginx.sh docker-entrypoint.sh ./
-RUN chmod +x init-nginx.sh docker-entrypoint.sh
+COPY config-nginx.sh docker-entrypoint.sh ./
+RUN chmod +x config-nginx.sh docker-entrypoint.sh
 
 EXPOSE 80
 
