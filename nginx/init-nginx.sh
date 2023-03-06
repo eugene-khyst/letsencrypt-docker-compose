@@ -58,8 +58,10 @@ use_lets_encrypt_certificate() {
 }
 
 reload_nginx() {
-  echo "Reloading Nginx configuration"
-  nginx -s reload
+  if [ -e /var/run/nginx.pid ]; then
+    echo "Reloading Nginx configuration"
+    nginx -s reload
+  fi
 }
 
 wait_for_lets_encrypt_certificate() {
