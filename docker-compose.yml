@@ -4,6 +4,8 @@ services:
   cli:
     build: ./cli
     image: evgeniy-khyst/letsencrypt-docker-compose-cli
+    environment:
+      - COMPOSE_PROJECT_NAME
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workdir
