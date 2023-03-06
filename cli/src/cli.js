@@ -1,5 +1,4 @@
 import inquirer from 'inquirer';
-import { promisify } from 'util';
 import {
   deleteNginxConfigFile,
   readConfig,
@@ -15,7 +14,10 @@ import {
   execConfigNginx,
 } from './shell-commands.js';
 
-const sleep = promisify((a, f) => setTimeout(f, a));
+const sleep = (millis) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, millis);
+  });
 
 const askDomain = async (config, domainName) => {
   const domainConfig =
@@ -221,7 +223,7 @@ const obtainProductionCertificates = async (config) => {
     await writeConfigFiles(config);
     await runDeleteCertbotCertificate(domainName);
     await execConfigNginx(); // Use dummy certificate
-    await sleep(3);
+    await sleep(3000);
     await runCertbot(); // Obtain Let's Encrypt certificate
     await execConfigNginx(); // Use Let's Encrypt certificate
   }
@@ -232,7 +234,7 @@ const addDomains = async (config) => {
   if (await askConfim()) {
     await writeConfigFiles(config);
     await execConfigNginx(); // Use dummy certificate
-    await sleep(3);
+    await sleep(3000);
     await runCertbot(); // Obtain Let's Encrypt certificate
     await execConfigNginx(); // Use Let's Encrypt certificate
   }
