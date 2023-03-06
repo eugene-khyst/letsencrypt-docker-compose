@@ -258,13 +258,6 @@ const removeDomains = async (config) => {
   }
 };
 
-const editNginxConfig = async (config) => {
-  await askNginxConfig(config);
-  if (await askConfim()) {
-    await writeConfigFiles(config);
-  }
-};
-
 const askConfig = async () => {
   const config = await readConfig();
 
@@ -272,9 +265,10 @@ const askConfig = async () => {
     await initConfig(config);
   } else {
     if (!(await isNginxServiceRunning())) {
-      throw new Error(
+      console.error(
         "Service 'nginx' is not running, start the services first: docker compose up -d"
       );
+      return;
     }
 
     const hasTestCerts =
@@ -299,7 +293,6 @@ const askConfig = async () => {
             name: 'Remove existing domains',
             value: 'removeDomains',
           },
-          { name: 'Edit Nginx configuration', value: 'editNginxConfig' },
           {
             name: "Manually renew all Let's Encrypt certificates (force renewal)",
             value: 'forceRenewCertificates',
@@ -314,7 +307,6 @@ const askConfig = async () => {
       obtainProductionCertificates,
       addDomains,
       removeDomains,
-      editNginxConfig,
       forceRenewCertificates,
     };
 

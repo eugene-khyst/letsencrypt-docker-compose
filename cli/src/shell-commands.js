@@ -3,12 +3,14 @@ import { exec } from 'child_process';
 
 const execute = promisify(exec);
 
-const runCommand = async (command) => {
+const runCommand = async (command, logOutput = true) => {
   try {
     console.log(command);
     const { stdout, stderr } = await execute(command);
-    console.log(stderr);
-    console.log(stdout);
+    console.error(stderr);
+    if (logOutput) {
+      console.log(stdout);
+    }
     return { stdout, stderr };
   } catch (error) {
     console.error(error);
@@ -17,7 +19,7 @@ const runCommand = async (command) => {
 };
 
 export const isNginxServiceRunning = async () => {
-  const { stdout } = await runCommand('docker compose ps --format json');
+  const { stdout } = await runCommand('docker compose ps --format json', false);
   const containers = JSON.parse(stdout);
   return !!containers.find(
     (container) =>
