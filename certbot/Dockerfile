@@ -2,8 +2,9 @@ FROM certbot/certbot:v1.32.2
 
 RUN apk add --no-cache jq
 
-COPY certbot.sh /opt/
+WORKDIR /letsencrypt-docker-compose
 
-RUN chmod +x /opt/certbot.sh
+COPY docker-entrypoint.sh ./
+RUN chmod +x docker-entrypoint.sh
 
-ENTRYPOINT ["/opt/certbot.sh"]
+ENTRYPOINT ["/letsencrypt-docker-compose/docker-entrypoint.sh"]

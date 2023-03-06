@@ -21,16 +21,6 @@ generate_dhparams_if_absent() {
   fi
 }
 
-create_nginx_conf_if_absent() {
-  if [ ! -f "${nginx_conf_dir}/${1}.conf" ]; then
-    echo "Creating Nginx configuration file ${nginx_conf_dir}/${1}.conf"
-    cat <<EOF > "${nginx_conf_dir}/${1}.conf"
-ssl_certificate ${nginx_conf_dir}/dummy/${1}/fullchain.pem;
-ssl_certificate_key ${nginx_conf_dir}/dummy/${1}/privkey.pem;
-EOF
-  fi
-}
-
 generate_dummy_certificate_if_absent() {
   if [ ! -f "${nginx_conf_dir}/dummy/${1}/fullchain.pem" ]; then
     echo "Generating dummy ceritificate for $1"
@@ -44,31 +34,26 @@ generate_dummy_certificate_if_absent() {
 }
 
 use_dummy_certificate() {
-  if grep -q "${letsencrypt_certs_dir}/live/${1}" "${nginx_conf_dir}/${1}.conf"; then
-    echo "Switching Nginx to use dummy certificate for $1"
-    sed -i "s|${letsencrypt_certs_dir}/live/${1}|${nginx_conf_dir}/dummy/${1}|g" "${nginx_conf_dir}/${1}.conf"
-  fi
+  echo "Switching Nginx to use dummy certificate for $1"
+  cat <<EOF > "${nginx_conf_dir}/${1}.conf"
+ssl_certificate ${nginx_conf_dir}/dummy/${1}/fullchain.pem;
+ssl_certificate_key ${nginx_conf_dir}/dummy/${1}/privkey.pem;
+EOF
 }
 
 use_lets_encrypt_certificate() {
-  if grep -q "${nginx_conf_dir}/dummy/${1}" "${nginx_conf_dir}/${1}.conf"; then
-    echo "Switching Nginx to use Let's Encrypt certificate for $1"
-    sed -i "s|${nginx_conf_dir}/dummy/${1}|${letsencrypt_certs_dir}/live/${1}|g" "${nginx_conf_dir}/${1}.conf"
-  fi
+  echo "Switching Nginx to use Let's Encrypt certificate for $1"
+  cat <<EOF > "${nginx_conf_dir}/${1}.conf"
+ssl_certificate ${letsencrypt_certs_dir}/live/${1}/fullchain.pem;
+ssl_certificate_key ${letsencrypt_certs_dir}/live/${1}/privkey.pem;
+EOF
 }
 
 reload_nginx() {
-  echo "Reloading Nginx configuration"
-  nginx -s reload
-}
-
-wait_for_lets_encrypt_certificate() {
-  until [ -d "${letsencrypt_certs_dir}/live/${1}" ]; do
-    echo "Waiting for Let's Encrypt certificate for $1"
-    sleep 5s & wait ${!}
-  done
-  use_lets_encrypt_certificate "$1"
-  reload_nginx
+  if [ -e /var/run/nginx.pid ]; then
+    echo "Reloading Nginx configuration"
+    nginx -s reload
+  fi
 }
 
 echo "Configuring domains:"
@@ -79,19 +64,13 @@ generate_dhparams_if_absent
 for domain in $domains; do
   echo "Configuring domain $domain"
 
-  create_nginx_conf_if_absent "$domain"
   generate_dummy_certificate_if_absent "$domain"
 
   if [ ! -d "${letsencrypt_certs_dir}/live/${domain}" ]; then
     use_dummy_certificate "$domain"
-    if [ "$DRY_RUN" = "true" ]; then
-      echo "Dry run is enabled"
-    else
-      wait_for_lets_encrypt_certificate "$domain" &
-    fi
   else
     use_lets_encrypt_certificate "$domain"
   fi
 done
 
-exec nginx -g "daemon off;"
+reload_nginx
