@@ -13,8 +13,8 @@ services:
   nginx:
     build: ./nginx
     image: evgeniy-khyst/nginx
-    environment:
-      - DRY_RUN
+    env_file:
+      - .env
     volumes:
       - ./config.json:/letsencrypt-docker-compose/config.json:ro
       - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
@@ -37,8 +37,8 @@ services:
   certbot:
     build: ./certbot
     image: evgeniy-khyst/certbot
-    environment:
-      - DRY_RUN
+    env_file:
+      - .env
     volumes:
       - ./config.json:/letsencrypt-docker-compose/config.json:ro
       - letsencrypt_certs:/etc/letsencrypt
@@ -50,9 +50,8 @@ services:
   cron:
     build: ./cron
     image: evgeniy-khyst/cron
-    environment:
-      - COMPOSE_PROJECT_NAME
-      - DRY_RUN
+    env_file:
+      - .env
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workdir:ro
