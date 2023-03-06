@@ -27,27 +27,27 @@ export const isNginxServiceRunning = async () => {
   );
 };
 
-export const reloadNginxConfig = async () => {
+export const execNginxReload = async () => {
   await runCommand('docker compose exec --no-TTY nginx nginx -s reload');
 };
 
-export const runConfigNginx = async () => {
+export const execConfigNginx = async () => {
   await runCommand(
     'docker compose exec --no-TTY nginx /letsencrypt-docker-compose/config-nginx.sh'
   );
 };
 
-export const createAndStartCertbot = async () => {
-  await runCommand('docker compose up -d --no-deps certbot');
+export const runCertbot = async () => {
+  await runCommand('docker compose run --rm --no-deps --no-TTY certbot');
 };
 
-export const deleteCertbotCertificate = async (domainName) => {
+export const runDeleteCertbotCertificate = async (domainName) => {
   await runCommand(
     `docker compose run --rm --no-deps --no-TTY --entrypoint certbot certbot -n delete --cert-name ${domainName}`
   );
 };
 
-export const forceRenewCertbotCertificate = async () => {
+export const runForceRenewCertbotCertificate = async () => {
   await runCommand(
     'docker compose run --rm --no-deps --no-TTY --entrypoint certbot certbot renew --no-random-sleep-on-renew --force-renew'
   );

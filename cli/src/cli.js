@@ -6,12 +6,12 @@ import {
   writeNginxConfigFiles,
 } from './config-processor.js';
 import {
-  createAndStartCertbot,
-  deleteCertbotCertificate,
-  forceRenewCertbotCertificate,
+  runCertbot,
+  runDeleteCertbotCertificate,
+  runForceRenewCertbotCertificate,
   isNginxServiceRunning,
-  reloadNginxConfig,
-  runConfigNginx,
+  execNginxReload,
+  execConfigNginx,
 } from './shell-commands.js';
 
 const askDomain = async (config, domainName) => {
@@ -216,10 +216,10 @@ const obtainProductionCertificates = async (config) => {
 
   if (await askConfim()) {
     await writeConfigFiles(config);
-    await deleteCertbotCertificate(domainName);
-    await runConfigNginx(); // Use dummy certificate
-    await createAndStartCertbot(); // Obtain Let's Encrypt certificate
-    await runConfigNginx(); // Use Let's Encrypt certificate
+    await runDeleteCertbotCertificate(domainName);
+    await execConfigNginx(); // Use dummy certificate
+    await runCertbot(); // Obtain Let's Encrypt certificate
+    await execConfigNginx(); // Use Let's Encrypt certificate
   }
 };
 
@@ -227,9 +227,9 @@ const addDomains = async (config) => {
   await askDomain(config);
   if (await askConfim()) {
     await writeConfigFiles(config);
-    await runConfigNginx(); // Use dummy certificate
-    await createAndStartCertbot(); // Obtain Let's Encrypt certificate
-    await runConfigNginx(); // Use Let's Encrypt certificate
+    await execConfigNginx(); // Use dummy certificate
+    await runCertbot(); // Obtain Let's Encrypt certificate
+    await execConfigNginx(); // Use Let's Encrypt certificate
   }
 };
 
@@ -244,15 +244,15 @@ const removeDomains = async (config) => {
   if (await askConfim()) {
     await writeConfigFiles(config);
     await deleteNginxConfigFile(domainName);
-    await reloadNginxConfig();
-    await deleteCertbotCertificate(domainName);
+    await execNginxReload();
+    await runDeleteCertbotCertificate(domainName);
   }
 };
 
 const forceRenewCertificates = async () => {
   if (await askConfim()) {
-    await forceRenewCertbotCertificate();
-    await reloadNginxConfig();
+    await runForceRenewCertbotCertificate();
+    await execNginxReload();
   }
 };
 
