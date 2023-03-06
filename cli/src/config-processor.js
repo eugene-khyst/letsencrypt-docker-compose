@@ -7,12 +7,14 @@ const nginxConfDir = './nginx-conf';
 
 export const readConfig = async () => {
   console.log('Reading config', configPath);
+  const defaultConfig = { domains: [] };
   try {
     const configJson = await fs.readFile(configPath, 'utf8');
-    return JSON.parse(configJson);
+    const config = JSON.parse(configJson);
+    return Object.assign(defaultConfig, config);
   } catch (e) {
     console.log('Existing valid config not found, using new empty config');
-    return null;
+    return defaultConfig;
   }
 };
 

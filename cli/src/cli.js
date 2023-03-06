@@ -5,11 +5,18 @@ import {
   writeConfig,
   writeNginxConfigFiles,
 } from './config-processor.js';
+import {
+  createAndStartCertbot,
+  deleteCertbotCertificate,
+  forceRenewCertbotCertificate,
+  reloadNginxConfig,
+  stopNginx,
+} from './shell-commands.js';
 
 const askDomain = async (config, domainName) => {
   const domainConfig =
     (domainName &&
-      config.domains?.find((domain) => domain.domain === domainName)) ||
+      config.domains.find((domain) => domain.domain === domainName)) ||
     {};
 
   const questions = [
@@ -126,19 +133,27 @@ const askDomain = async (config, domainName) => {
   }
 };
 
-const askChooseDomainName = async (actionName, config) => {
+const askChooseDomainName = async (message, config, filter) => {
   const domainsQuestions = [
     {
       type: 'list',
       name: 'domainName',
-      message: `What domain do you want to ${actionName}?`,
-      choices: config.domains.map((domain) => domain.domain),
+      message,
+      choices: config.domains
+        .filter(filter || (() => true))
+        .map((domain) => domain.domain),
     },
   ];
 
   const { domainName } = await inquirer.prompt(domainsQuestions);
 
-  return domainName;
+  const index = config.domains.findIndex(
+    (domain) => domain.domain === domainName
+  );
+
+  const domainConfig = config.domains[index];
+
+  return { domainName, index, domainConfig };
 };
 
 const askNginxConfig = async (config) => {
@@ -162,7 +177,7 @@ const askNginxConfig = async (config) => {
   Object.assign(config, answers);
 };
 
-const askConfimConfig = async (config) => {
+const askConfim = async () => {
   const questions = [
     {
       type: 'confirm',
@@ -173,81 +188,124 @@ const askConfimConfig = async (config) => {
   ];
 
   const { confirm } = await inquirer.prompt(questions);
-
-  if (confirm) {
-    await writeConfig(config);
-    await writeNginxConfigFiles(config);
-  }
-
   return confirm;
 };
 
-const removeDomain = (config, domainName) => {
-  const index = config.domains.findIndex(
-    (domain) => domain.domain === domainName
+const writeConfigFiles = async (config) => {
+  await writeConfig(config);
+  await writeNginxConfigFiles(config);
+};
+
+const initConfig = async (config) => {
+  await askDomain(config);
+  await askNginxConfig(config);
+  if (await askConfim()) {
+    await writeConfigFiles(config);
+  }
+};
+
+const obtainProductionCertificates = async (config) => {
+  const { domainName, domainConfig } = await askChooseDomainName(
+    "Which domain should be switched to a Let's Encrypt production environment?",
+    config,
+    (domain) => domain.testCert
   );
-  if (index >= 0) {
-    config.domains.splice(index, 1);
+
+  domainConfig.testCert = false;
+
+  if (await askConfim()) {
+    await writeConfigFiles(config);
+    await stopNginx();
+    await deleteCertbotCertificate(domainName);
+    await createAndStartCertbot();
+  }
+};
+
+const forceRenewCertificates = async () => {
+  if (await askConfim()) {
+    await forceRenewCertbotCertificate();
+    await reloadNginxConfig();
+  }
+};
+
+const addDomains = async (config) => {
+  await askDomain(config);
+  if (await askConfim()) {
+    await writeConfigFiles(config);
+  }
+};
+
+const removeDomains = async (config) => {
+  const { domainName, index } = await askChooseDomainName(
+    'Which domain do you want to remove?',
+    config
+  );
+
+  config.domains.splice(index, 1);
+
+  if (await askConfim()) {
+    await writeConfigFiles(config);
+    await deleteNginxConfigFile(domainName);
+    await reloadNginxConfig();
+    await deleteCertbotCertificate(domainName);
+  }
+};
+
+const editNginxConfig = async (config) => {
+  await askNginxConfig(config);
+  if (await askConfim()) {
+    await writeConfigFiles(config);
   }
 };
 
 const askConfig = async () => {
-  let config = await readConfig();
+  const config = await readConfig();
 
-  if (!config) {
-    config = { domains: [] };
-    await askDomain(config);
-    await askNginxConfig(config);
-    await askConfimConfig(config);
+  if (!config.domains.length) {
+    await initConfig(config);
   } else {
+    const hasTestCerts =
+      config.domains.filter((domain) => domain.testCert).length > 0;
+
     const questions = [
       {
         type: 'list',
         name: 'command',
         message: 'What do you want to do?',
         choices: [
-          { name: 'Edit existing domains', value: 'editDomains' },
+          ...(hasTestCerts
+            ? [
+                {
+                  name: "Switch to a Let's Encrypt production environment",
+                  value: 'obtainProductionCertificates',
+                },
+              ]
+            : []),
           { name: 'Add new domains', value: 'addDomains' },
           {
             name: 'Remove existing domains',
             value: 'removeDomains',
           },
-          { name: 'Edit Nginx configuration', value: 'editNginxConf' },
+          { name: 'Edit Nginx configuration', value: 'editNginxConfig' },
+          {
+            name: "Manually renew all Let's Encrypt certificates (force renewal)",
+            value: 'forceRenewCertificates',
+          },
         ],
       },
     ];
 
     const { command } = await inquirer.prompt(questions);
 
-    switch (command) {
-      case 'editDomains': {
-        const domainName = await askChooseDomainName('edit', config);
-        await askDomain(config, domainName);
-        await askConfimConfig(config);
-        break;
-      }
-      case 'addDomains': {
-        await askDomain(config);
-        await askConfimConfig(config);
-        break;
-      }
-      case 'removeDomains': {
-        const domainName = await askChooseDomainName('remove', config);
-        removeDomain(config, domainName);
-        if (await askConfimConfig(config)) {
-          await deleteNginxConfigFile(domainName);
-        }
-        break;
-      }
-      case 'editNginxConf': {
-        await askNginxConfig(config);
-        await askConfimConfig(config);
-        break;
-      }
-      default:
-        console.error('Unknown command', command);
-        break;
-    }
+    const commands = {
+      obtainProductionCertificates,
+      forceRenewCertificates,
+      addDomains,
+      removeDomains,
+      editNginxConfig,
+    };
+
+    await commands[command](config);
   }
 };
 

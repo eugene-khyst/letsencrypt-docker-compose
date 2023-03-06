@@ -377,7 +377,3 @@ docker volume rm nginx_conf
 docker volume create --name=nginx_conf
 docker compose up -d
 ```
-
-docker compose run --rm --no-deps --entrypoint certbot certbot -n delete --cert-name b.evgeniy-khyst.com
-
-docker compose run --rm --no-deps --entrypoint certbot certbot renew --no-random-sleep-on-renew --force-renew
