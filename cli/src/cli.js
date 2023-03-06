@@ -227,13 +227,6 @@ const obtainProductionCertificates = async (config) => {
   }
 };
 
-const forceRenewCertificates = async () => {
-  if (await askConfim()) {
-    await forceRenewCertbotCertificate();
-    await reloadNginxConfig();
-  }
-};
-
 const addDomains = async (config) => {
   await askDomain(config);
   if (await askConfim()) {
@@ -256,6 +249,13 @@ const removeDomains = async (config) => {
     await deleteNginxConfigFile(domainName);
     await reloadNginxConfig();
     await deleteCertbotCertificate(domainName);
+  }
+};
+
+const forceRenewCertificates = async () => {
+  if (await askConfim()) {
+    await forceRenewCertbotCertificate();
+    await reloadNginxConfig();
   }
 };
 
