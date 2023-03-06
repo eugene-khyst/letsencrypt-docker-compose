@@ -32,7 +32,7 @@ export const stopNginx = async () => {
 };
 
 export const restartNginx = async () => {
-  await runCommand('docker compose restart nginx');
+  await runCommand('docker compose up -d --force-recreate --wait nginx');
 };
 
 export const createAndStartCertbot = async () => {
