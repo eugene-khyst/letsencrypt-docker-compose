@@ -9,7 +9,10 @@ import {
   createAndStartCertbot,
   deleteCertbotCertificate,
   forceRenewCertbotCertificate,
+  isNginxServiceRunning,
   reloadNginxConfig,
+  restartNginx,
+  startNginx,
   stopNginx,
 } from './shell-commands.js';
 
@@ -201,6 +204,9 @@ const initConfig = async (config) => {
   await askNginxConfig(config);
   if (await askConfim()) {
     await writeConfigFiles(config);
+    if (await isNginxServiceRunning()) {
+      await restartNginx();
+    }
   }
 };
 
@@ -214,9 +220,10 @@ const obtainProductionCertificates = async (config) => {
   domainConfig.testCert = false;
 
   if (await askConfim()) {
-    await writeConfigFiles(config);
     await stopNginx();
+    await writeConfigFiles(config);
     await deleteCertbotCertificate(domainName);
+    await startNginx();
     await createAndStartCertbot();
   }
 };
@@ -264,6 +271,12 @@ const askConfig = async () => {
   if (!config.domains.length) {
     await initConfig(config);
   } else {
+    if (!(await isNginxServiceRunning())) {
+      throw new Error(
+        "Service 'nginx' is not running, start the services first: docker compose up -d"
+      );
+    }
+
     const hasTestCerts =
       config.domains.filter((domain) => domain.testCert).length > 0;
 
@@ -299,10 +312,10 @@ const askConfig = async () => {
 
     const commands = {
       obtainProductionCertificates,
-      forceRenewCertificates,
       addDomains,
       removeDomains,
       editNginxConfig,
+      forceRenewCertificates,
     };
 
     await commands[command](config);

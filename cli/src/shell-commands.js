@@ -16,12 +16,29 @@ const runCommand = async (command) => {
   }
 };
 
+export const isNginxServiceRunning = async () => {
+  const { stdout } = await runCommand('docker compose ps --format json');
+  const containers = JSON.parse(stdout);
+  return !!containers.find(
+    (container) =>
+      container.Service === 'nginx' && container.State === 'running'
+  );
+};
+
+export const startNginx = async () => {
+  await runCommand('docker compose start nginx');
+};
+
 export const stopNginx = async () => {
   await runCommand('docker compose stop nginx');
 };
 
+export const restartNginx = async () => {
+  await runCommand('docker compose restart nginx');
+};
+
 export const createAndStartCertbot = async () => {
-  await runCommand('docker compose up -d --always-recreate-deps certbot');
+  await runCommand('docker compose up -d --no-deps certbot');
 };
 
 export const reloadNginxConfig = async () => {
