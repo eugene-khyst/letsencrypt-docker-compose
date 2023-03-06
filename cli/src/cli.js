@@ -12,7 +12,6 @@ import {
   isNginxServiceRunning,
   reloadNginxConfig,
   restartNginx,
-  startNginx,
   stopNginx,
 } from './shell-commands.js';
 
@@ -220,10 +219,10 @@ const obtainProductionCertificates = async (config) => {
   domainConfig.testCert = false;
 
   if (await askConfim()) {
-    await stopNginx();
     await writeConfigFiles(config);
+    await stopNginx();
     await deleteCertbotCertificate(domainName);
-    await startNginx();
+    await restartNginx();
     await createAndStartCertbot();
   }
 };
@@ -239,6 +238,8 @@ const addDomains = async (config) => {
   await askDomain(config);
   if (await askConfim()) {
     await writeConfigFiles(config);
+    await restartNginx();
+    await createAndStartCertbot();
   }
 };
 

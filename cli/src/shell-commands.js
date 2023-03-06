@@ -5,7 +5,7 @@ const execute = promisify(exec);
 
 const runCommand = async (command, logOutput = true) => {
   try {
-    console.log('Executing command', command);
+    console.log('Executing command:', command);
     const { stdout, stderr } = await execute(command);
     console.error(stderr);
     if (logOutput) {
@@ -25,10 +25,6 @@ export const isNginxServiceRunning = async () => {
     (container) =>
       container.Service === 'nginx' && container.State === 'running'
   );
-};
-
-export const startNginx = async () => {
-  await runCommand('docker compose start nginx');
 };
 
 export const stopNginx = async () => {
