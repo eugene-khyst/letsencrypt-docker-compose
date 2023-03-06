@@ -84,6 +84,7 @@ for domain in $domains; do
 
   if [ ! -d "${letsencrypt_certs_dir}/live/${domain}" ]; then
     use_dummy_certificate "$domain"
+    reload_nginx
     if [ "$DRY_RUN" = "true" ]; then
       echo "Dry run is enabled"
     else
@@ -91,5 +92,6 @@ for domain in $domains; do
     fi
   else
     use_lets_encrypt_certificate "$domain"
+    reload_nginx
   fi
 done
