@@ -5,7 +5,7 @@ const execute = promisify(exec);
 
 const runCommand = async (command, logOutput = true) => {
   try {
-    console.log(command);
+    console.log('Executing command', command);
     const { stdout, stderr } = await execute(command);
     console.error(stderr);
     if (logOutput) {
