@@ -93,5 +93,3 @@ for domain in $domains; do
     use_lets_encrypt_certificate "$domain"
   fi
 done
-
-exec nginx -g "daemon off;"
