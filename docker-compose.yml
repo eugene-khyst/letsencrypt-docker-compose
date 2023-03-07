@@ -1,44 +1,82 @@
-version: "2"
+version: "3"
 
 services:
+  cli:
+    build: ./cli
+    image: evgeniy-khyst/letsencrypt-docker-compose-cli
+    environment:
+      - COMPOSE_PROJECT_NAME
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./:/workdir
+    profiles:
+      - config
+
   nginx:
     build: ./nginx
     image: evgeniy-khyst/nginx
-    env_file:
-      - ./config.env
+    environment:
+      - DRY_RUN
     volumes:
-      - nginx_conf:/etc/nginx/sites
+      - ./config.json:/letsencrypt-docker-compose/config.json:ro
+      - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-conf/conf.d:/etc/nginx/conf.d:ro
+      - ./html:/var/www/html:ro
+      - nginx_conf_ssl:/etc/nginx/ssl
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
-      - ./vhosts:/etc/nginx/vhosts
-      - ./html:/var/www/html
     ports:
       - "80:80"
       - "443:443"
+    healthcheck:
+      test: ["CMD", "nc", "-z", "nginx", "80"]
+      interval: 30s
+      timeout: 30s
+      start_period: 30s
+      retries: 10
     restart: unless-stopped
 
   certbot:
     build: ./certbot
     image: evgeniy-khyst/certbot
-    env_file:
-      - ./config.env
+    environment:
+      - DRY_RUN
     volumes:
+      - ./config.json:/letsencrypt-docker-compose/config.json:ro
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
+    healthcheck:
+      test: ["CMD", "sh", "-c", 'test -n "$(ls -A /etc/letsencrypt/live/)"']
+      interval: 30s
+      timeout: 30s
+      start_period: 30s
+      retries: 10
+    depends_on:
+      nginx:
+        condition: service_healthy
+    restart: unless-stopped
 
   cron:
     build: ./cron
     image: evgeniy-khyst/cron
     environment:
-      COMPOSE_PROJECT_NAME: "${COMPOSE_PROJECT_NAME}"
+      - COMPOSE_PROJECT_NAME
+      - DRY_RUN
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workdir:ro
+    depends_on:
+      certbot:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # Replace with your backend image or remove
+  example-backend:
+    build: ./examples/nodejs-backend
+    image: evgeniy-khyst/expressjs-helloworld
     restart: unless-stopped
 
 volumes:
-  nginx_conf:
-    external: true
+  nginx_conf_ssl:
   letsencrypt_certs:
-    external: true
   certbot_acme_challenge:

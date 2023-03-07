@@ -1,0 +1,54 @@
+server {
+    listen 80;
+    listen [::]:80;
+    server_name {{domain}} {{#if wwwSubdomain}}www.{{domain}}{{/if}};
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot/{{domain}};
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name {{domain}} {{#if wwwSubdomain}}www.{{domain}}{{/if}};
+
+    include /etc/nginx/ssl/{{domain}}.conf;
+
+    ssl_dhparam /etc/nginx/ssl/ssl-dhparams.pem;
+
+    include /etc/nginx/conf.d/includes/options-ssl-nginx.conf;
+
+    include /etc/nginx/conf.d/includes/hsts.conf;
+
+    {{#if dnsResolver}}
+    # Internal Docker DNS resolver
+    resolver {{dnsResolver}};
+    {{/if}}
+
+{{#*inline "reverseProxy"}}
+location / {
+    proxy_set_header Host $host;
+    proxy_set_header X-Real-IP $remote_addr;
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Forwarded-Proto $scheme;
+
+    # Let Nginx start if upstream host is unreachable
+    set $upstream {{upstream}};
+    proxy_pass http://$upstream;
+}
+{{/inline}}
+
+{{#*inline "staticContent"}}
+location / {
+    root /var/www/html/{{domain}};
+    index index.html index.htm;
+}
+{{/inline}}
+
+    {{> (lookup . 'requestHandler') }}
+}

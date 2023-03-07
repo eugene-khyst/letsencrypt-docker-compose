@@ -1,0 +1,13 @@
+{
+  "name": "nodejs-backend-example",
+  "version": "1.0.0",
+  "description": "Node.js on Docker",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "license": "Apache-2.0",
+  "dependencies": {
+    "express": "^4.18.1"
+  }
+}

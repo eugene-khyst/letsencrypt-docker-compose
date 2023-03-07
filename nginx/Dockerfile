@@ -1,14 +1,12 @@
 FROM nginx:1.23-alpine
 
-RUN apk add --no-cache openssl
+RUN apk add --no-cache openssl jq
 
-COPY default.conf /etc/nginx/conf.d/
-COPY gzip.conf options-ssl-nginx.conf hsts.conf /etc/nginx/includes/
-COPY site.conf.tpl /customization/
-COPY nginx.sh /customization/
+WORKDIR /letsencrypt-docker-compose
 
-RUN chmod +x /customization/nginx.sh
+COPY config-nginx.sh start-nginx.sh ./
+RUN chmod +x config-nginx.sh start-nginx.sh
 
 EXPOSE 80
 
-CMD ["/customization/nginx.sh"]
+CMD ["/letsencrypt-docker-compose/start-nginx.sh"]

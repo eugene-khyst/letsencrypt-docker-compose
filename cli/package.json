@@ -1,0 +1,27 @@
+{
+  "name": "letsencrypt-docker-compose-cli",
+  "version": "1.0.0",
+  "description": "A CLI for configuring Let's Encrypt Docker Compose that automatically obtains and renews Let's Encrypt TLS certificates and sets up HTTPS in Nginx for multiple domain names using Docker Compose.",
+  "type": "module",
+  "main": "./src/index.js",
+  "scripts": {
+    "format": "prettier --write . && eslint --fix"
+  },
+  "author": "Eugene Khyst",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/evgeniy-khist/letsencrypt-docker-compose/issues"
+  },
+  "homepage": "https://github.com/evgeniy-khist/letsencrypt-docker-compose#readme",
+  "devDependencies": {
+    "eslint": "8.35.0",
+    "eslint-config-airbnb-base": "15.0.0",
+    "eslint-config-prettier": "8.6.0",
+    "eslint-plugin-import": "2.27.5",
+    "prettier": "2.8.4"
+  },
+  "dependencies": {
+    "handlebars": "^4.7.7",
+    "inquirer": "9.1.4"
+  }
+}

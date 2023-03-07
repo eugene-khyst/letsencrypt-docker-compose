@@ -1,9 +1,11 @@
-FROM certbot/certbot:v1.29.0
+FROM certbot/certbot:v1.32.2
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache jq
 
-COPY certbot.sh /opt/
+WORKDIR /letsencrypt-docker-compose
 
-RUN chmod +x /opt/certbot.sh
+COPY certbot-certonly.sh start-certbot.sh ./
+RUN chmod +x certbot-certonly.sh start-certbot.sh
 
-ENTRYPOINT ["/opt/certbot.sh"]
+ENTRYPOINT []
+CMD ["/letsencrypt-docker-compose/start-certbot.sh"]
