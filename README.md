@@ -27,9 +27,9 @@
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
-Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
-
 ## <a id="3b878279a04dc47d60932cb294d96259"></a>Overview
+
+Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
 
 This example automatically obtains and renews [Let's Encrypt](https://letsencrypt.org/) free SSL/TLS certificates and sets up HTTPS in Nginx for multiple domain names using Docker Compose.
 
