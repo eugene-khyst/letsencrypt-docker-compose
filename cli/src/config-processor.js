@@ -11,7 +11,7 @@ export const readConfig = async () => {
   try {
     const configJson = await fs.readFile(configPath, 'utf8');
     const config = JSON.parse(configJson);
-    console.log('Found existing config');
+    console.log('Found an existing config');
     return Object.assign(defaultConfig, config);
   } catch (e) {
     console.log('Existing valid config not found, using new empty config');
