@@ -271,7 +271,10 @@ const askConfig = async () => {
   } else {
     if (!(await isNginxServiceRunning())) {
       console.error(
-        "Service 'nginx' is not running, start the services first: docker compose up -d"
+        'To edit an existing config, start the services first: docker compose up -d'
+      );
+      console.error(
+        'To perform a new initial set up, delete the existing config: rm config.json'
       );
       return;
     }
