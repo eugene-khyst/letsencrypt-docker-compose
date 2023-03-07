@@ -37,18 +37,20 @@ export const execConfigNginx = async () => {
   );
 };
 
-export const runCertbot = async () => {
-  await runCommand('docker compose run --rm --no-deps --no-TTY certbot');
-};
-
-export const runDeleteCertbotCertificate = async (domainName) => {
+export const execCertbotCertonly = async () => {
   await runCommand(
-    `docker compose run --rm --no-deps --no-TTY --entrypoint certbot certbot -n delete --cert-name ${domainName}`
+    'docker compose exec --no-TTY certbot /letsencrypt-docker-compose/certbot-certonly.sh'
   );
 };
 
-export const runForceRenewCertbotCertificate = async () => {
+export const execDeleteCertbotCertificate = async (domainName) => {
   await runCommand(
-    'docker compose run --rm --no-deps --no-TTY --entrypoint certbot certbot renew --no-random-sleep-on-renew --force-renew'
+    `docker compose exec --no-TTY certbot certbot --noninteractive delete --cert-name ${domainName}`
+  );
+};
+
+export const execForceRenewCertbotCertificate = async () => {
+  await runCommand(
+    'docker compose exec --no-TTY certbot certbot renew --no-random-sleep-on-renew --force-renew'
   );
 };

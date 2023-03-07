@@ -6,12 +6,12 @@ import {
   writeNginxConfigFiles,
 } from './config-processor.js';
 import {
-  runCertbot,
-  runDeleteCertbotCertificate,
-  runForceRenewCertbotCertificate,
   isNginxServiceRunning,
   execNginxReload,
   execConfigNginx,
+  execDeleteCertbotCertificate,
+  execCertbotCertonly,
+  execForceRenewCertbotCertificate,
 } from './shell-commands.js';
 
 const sleep = (millis) =>
@@ -221,10 +221,10 @@ const obtainProductionCertificates = async (config) => {
 
   if (await askConfim()) {
     await writeConfigFiles(config);
-    await runDeleteCertbotCertificate(domainName);
+    await execDeleteCertbotCertificate(domainName);
     await execConfigNginx(); // Use dummy certificate
     await sleep(3000);
-    await runCertbot(); // Obtain Let's Encrypt certificate
+    await execCertbotCertonly(); // Obtain Let's Encrypt certificate
     await execConfigNginx(); // Use Let's Encrypt certificate
   }
 };
@@ -235,7 +235,7 @@ const addDomains = async (config) => {
     await writeConfigFiles(config);
     await execConfigNginx(); // Use dummy certificate
     await sleep(3000);
-    await runCertbot(); // Obtain Let's Encrypt certificate
+    await execCertbotCertonly(); // Obtain Let's Encrypt certificate
     await execConfigNginx(); // Use Let's Encrypt certificate
   }
 };
@@ -252,13 +252,13 @@ const removeDomains = async (config) => {
     await writeConfigFiles(config);
     await deleteNginxConfigFile(domainName);
     await execNginxReload();
-    await runDeleteCertbotCertificate(domainName);
+    await execDeleteCertbotCertificate(domainName);
   }
 };
 
 const forceRenewCertificates = async () => {
   if (await askConfim()) {
-    await runForceRenewCertbotCertificate();
+    await execForceRenewCertbotCertificate();
     await execNginxReload();
   }
 };

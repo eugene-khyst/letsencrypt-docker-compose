@@ -2,9 +2,13 @@
 
 set -e
 
-trap exit INT TERM
-
 config="/letsencrypt-docker-compose/config.json"
+
+if [ -f "$config" ]; then
+  echo "Configuration file not found"
+  exit 1;
+fi
+
 domains=$(jq -r '.domains[].domain' $config)
 
 if [ -z "$domains" ]; then

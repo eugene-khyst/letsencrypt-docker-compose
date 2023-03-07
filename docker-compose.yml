@@ -22,7 +22,7 @@ services:
       - ./nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx-conf/conf.d:/etc/nginx/conf.d:ro
       - ./html:/var/www/html:ro
-      - nginx_conf:/etc/nginx/ssl
+      - nginx_conf_ssl:/etc/nginx/ssl
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
     ports:
@@ -45,9 +45,16 @@ services:
       - ./config.json:/letsencrypt-docker-compose/config.json:ro
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
+    healthcheck:
+      test: ["CMD", "sh", "-c", 'test -n "$(ls -A /etc/letsencrypt/live/)"']
+      interval: 30s
+      timeout: 30s
+      start_period: 30s
+      retries: 10
     depends_on:
       nginx:
         condition: service_healthy
+    restart: unless-stopped
 
   cron:
     build: ./cron
@@ -60,7 +67,7 @@ services:
       - ./:/workdir:ro
     depends_on:
       certbot:
-        condition: service_completed_successfully
+        condition: service_healthy
     restart: unless-stopped
 
   # Replace with your backend image or remove
@@ -70,6 +77,6 @@ services:
     restart: unless-stopped
 
 volumes:
-  nginx_conf:
+  nginx_conf_ssl:
   letsencrypt_certs:
   certbot_acme_challenge:

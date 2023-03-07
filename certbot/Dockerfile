@@ -4,7 +4,8 @@ RUN apk add --no-cache jq
 
 WORKDIR /letsencrypt-docker-compose
 
-COPY docker-entrypoint.sh ./
-RUN chmod +x docker-entrypoint.sh
+COPY certbot-certonly.sh start-certbot.sh ./
+RUN chmod +x certbot-certonly.sh start-certbot.sh
 
-ENTRYPOINT ["/letsencrypt-docker-compose/docker-entrypoint.sh"]
+ENTRYPOINT []
+CMD ["/letsencrypt-docker-compose/start-certbot.sh"]
