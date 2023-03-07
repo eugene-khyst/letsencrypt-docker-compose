@@ -267,7 +267,7 @@ const askConfig = async () => {
         'To edit an existing config, start the services first: docker compose up -d'
       );
       console.error(
-        'To perform a new initial set up, delete the existing config: rm config.json'
+        'To perform a new initial setup, delete the existing config: rm config.json'
       );
       return;
     }
