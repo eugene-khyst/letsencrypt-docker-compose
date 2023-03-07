@@ -46,9 +46,9 @@ The project supports separate TLS certificates for multiple domain names.
 
 The idea is simple. There are three main services:
 
-- `nginx`
-- `certbot` for obtaining and renewing certificates
-- `cron` for triggering certificates renewal
+- `nginx`,
+- `certbot` for obtaining and renewing certificates,
+- `cron` for triggering certificates renewal,
 
 and one additional service `cli` for interactive configuration.
 
