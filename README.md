@@ -1,33 +1,33 @@
-# letsencrypt-docker-compose
+# <a id="0"></a>letsencrypt-docker-compose
 
-- [Overview](#3b878279a04dc47d60932cb294d96259)
-- [Initial setup](#1231369e1218613623e1b520c27ce190)
-  - [Prerequisites](#ee68e5b99222bbc29a480fcb0d1d6ee2)
-  - [Step 1 - Create DNS records](#b6489f4e6a37a699341228745cc4a4dd)
-  - [Step 2 - Copy static content or define upstream service](#57c073bed3e25df087a43db30090819a)
-    - [Static content](#1accac49de3b88324dc4cd52712d9f53)
-    - [Reverse proxy](#2ba6286fc21b9f37ebcf7f9d01090f17)
-  - [Step 3 - Perform an initial setup using the CLI tool](#8a367c5b5b9179c1a59885c8e3f3d5d9)
-  - [Step 4 - Start the services](#fd5f79fd684417e910f40b0004603b4b)
-  - [Step 5 - Verify that HTTPS works with the test certificates](#e8d3ea9aff109edace9f33f04ddce45b)
-  - [Step 6 - Switch to a Let's Encrypt production environment](#83c24af0719383a90a1576484c8a3e08)
-  - [Step 7 - Verify that HTTPS works with the production certificates](#faeaa1e19a5682e52d8201a099044c56)
-- [Adding new domains without downtime](#bd3ae334a9689684121c98cc58fd5750)
-  - [Step 1 - Create new DNS records](#26fc80a8473e501027bfd6d8e774a62d)
-  - [Step 2 - Copy static content or define upstream service](#57c073bed3e25df087a43db30090819a)
-  - [Step 3 - Update the configuration using the CLI tool](#52187f842989030546941fc5e6bf8b96)
-  - [Step 4 - Verify that HTTPS works](#ef5e718a6533a9cbacecbfc090a1fd3f)
-- [Removing existing domains without downtime](#e17bbf60a7959ee0aeb00254bcc5f2f7)
-- [Manually renewing all Let's Encrypt certificates](#1c9c317c41bc07f2bbc0d79f868482a5)
-- [Running on a local machine not directed to by DNS records](#b879ea2c4367eac8be407f516c2a7e8d)
-  - [Step 1 - Perform an initial setup using the CLI tool](#ef749984c45138b34638df669ff9c1f1)
-  - [Step 2 - Start the services in dry run mode](#a62de837fdc7d81a2ab336edb62497f3)
-- [Advanced Nginx configuration](#2f76e2a844c9521949ed6083ed96655b)
-- [SSL configuration for A+ rating](#f9987558925ac3a1ca42e184e10d7b73)
+- [Overview](#1)
+- [Initial setup](#2)
+  - [Prerequisites](#2-1)
+  - [Step 1 - Create DNS records](#2-2)
+  - [Step 2 - Copy static content or define upstream service](#2-3)
+    - [Static content](#2-3-1)
+    - [Reverse proxy](#2-3-2)
+  - [Step 3 - Perform an initial setup using the CLI tool](#2-4)
+  - [Step 4 - Start the services](#2-5)
+  - [Step 5 - Verify that HTTPS works with the test certificates](#2-6)
+  - [Step 6 - Switch to a Let's Encrypt production environment](#2-7)
+  - [Step 7 - Verify that HTTPS works with the production certificates](#2-8)
+- [Adding new domains without downtime](#3)
+  - [Step 1 - Create new DNS records](#3-1)
+  - [Step 2 - Copy static content or define upstream service](#3-2)
+  - [Step 3 - Update the configuration using the CLI tool](#3-3)
+  - [Step 4 - Verify that HTTPS works](#3-4)
+- [Removing existing domains without downtime](#4)
+- [Manually renewing all Let's Encrypt certificates](#5)
+- [Running on a local machine not directed to by DNS records](#6)
+  - [Step 1 - Perform an initial setup using the CLI tool](#6-1)
+  - [Step 2 - Start the services in dry run mode](#6-2)
+- [Advanced Nginx configuration](#7)
+- [SSL configuration for A+ rating](#8)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
-## <a id="3b878279a04dc47d60932cb294d96259"></a>Overview
+## <a id="1"></a>Overview
 
 Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
 
@@ -59,9 +59,11 @@ The sequence of actions:
 3. Certbot waits for Nginx to become ready and obtains certificates.
 4. Cron triggers Certbot to try to renew certificates and Nginx to reload configuration daily.
 
-## <a id="1231369e1218613623e1b520c27ce190"></a>Initial setup
+[Back to top](#0)
 
-### <a id="ee68e5b99222bbc29a480fcb0d1d6ee2"></a>Prerequisites
+## <a id="2"></a>Initial setup
+
+### <a id="2-1"></a>Prerequisites
 
 1. [Docker](https://docs.docker.com/install/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed
 2. You have a domain name
@@ -71,7 +73,7 @@ The sequence of actions:
    git clone https://github.com/evgeniy-khist/letsencrypt-docker-compose.git
    ```
 
-### <a id="b6489f4e6a37a699341228745cc4a4dd"></a>Step 1 - Create DNS records
+### <a id="2-2"></a>Step 1 - Create DNS records
 
 For simplicity, this example deals with domain names `a.evgeniy-khyst.com` and `b.evgeniy-khyst.com`,
 but in reality, domain names can be any (e.g., `example.com`, `anotherdomain.net`).
@@ -90,14 +92,14 @@ Also, create CNAME records for the `www` subdomains if needed.
 | CNAME | `www.a.evgeniy-khyst.com` | is an alias of `a.evgeniy-khyst.com` |
 | CNAME | `www.a.evgeniy-khyst.com` | is an alias of `a.evgeniy-khyst.com` |
 
-### <a id="57c073bed3e25df087a43db30090819a"></a>Step 2 - Copy static content or define upstream service
+### <a id="2-3"></a>Step 2 - Copy static content or define upstream service
 
 Nginx can be configured
 
 - to serve static content,
 - as a reverse proxy (e.g., proxying all requests to a backend server).
 
-#### <a id="1accac49de3b88324dc4cd52712d9f53"></a>Static content
+#### <a id="2-3-1"></a>Static content
 
 Copy your static content to `html/${domain}` directory.
 
@@ -105,7 +107,7 @@ Copy your static content to `html/${domain}` directory.
 cp -R ./examples/html/ ./html/a.evgeniy-khyst.com
 ```
 
-#### <a id="2ba6286fc21b9f37ebcf7f9d01090f17"></a>Reverse proxy
+#### <a id="2-3-2"></a>Reverse proxy
 
 The `docker-compose.yml` contains the `example-backend` service.
 It's a simple Node.js web app listening on port 8080.
@@ -119,7 +121,7 @@ services:
     restart: unless-stopped
 ```
 
-### <a id="8a367c5b5b9179c1a59885c8e3f3d5d9"></a>Step 3 - Perform an initial setup using the CLI tool
+### <a id="2-4"></a>Step 3 - Perform an initial setup using the CLI tool
 
 Run the CLI tool and follow the instructions to perform an initial setup.
 
@@ -132,7 +134,7 @@ We will switch to a Let's Encrypt production environment after verifying that HT
 
 ![letsencrypt-docker-compose CLI initial setup](https://raw.githubusercontent.com/evgeniy-khist/letsencrypt-docker-compose/main/examples/initial-setup.svg)
 
-### <a id="fd5f79fd684417e910f40b0004603b4b"></a>Step 4 - Start the services
+### <a id="2-5"></a>Step 4 - Start the services
 
 On the first run, build the services.
 
@@ -159,7 +161,7 @@ Switching Nginx to use Let's Encrypt certificate
 Reloading Nginx configuration
 ```
 
-### <a id="e8d3ea9aff109edace9f33f04ddce45b"></a>Step 5 - Verify that HTTPS works with the test certificates
+### <a id="2-6"></a>Step 5 - Verify that HTTPS works with the test certificates
 
 For each domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
 Certificates issued by `(STAGING) Let's Encrypt` are considered not secure by browsers and cURL.
@@ -171,7 +173,7 @@ curl --insecure https://b.evgeniy-khyst.com/hello?name=Eugene
 curl --insecure https://www.b.evgeniy-khyst.com/hello?name=Eugene
 ```
 
-### <a id="83c24af0719383a90a1576484c8a3e08"></a>Step 6 - Switch to a Let's Encrypt production environment
+### <a id="2-7"></a>Step 6 - Switch to a Let's Encrypt production environment
 
 Run the CLI tool, choose `Switch to a Let's Encrypt production environment` and follow the instructions.
 
@@ -182,7 +184,7 @@ docker compose run --rm cli
 ![letsencrypt-docker-compose CLI switch to a Let's Encrypt production environment
 ](https://raw.githubusercontent.com/evgeniy-khist/letsencrypt-docker-compose/main/examples/switch-to-prod-env.svg)
 
-### <a id="faeaa1e19a5682e52d8201a099044c56"></a>Step 7 - Verify that HTTPS works with the production certificates
+### <a id="2-8"></a>Step 7 - Verify that HTTPS works with the production certificates
 
 For each domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
 Certificates issued by `Let's Encrypt` are considered secure by browsers and cURL.
@@ -198,9 +200,11 @@ Optionally check your domains with [SSL Labs SSL Server Test](https://www.ssllab
 
 The `cron` service will automatically renew the Let's Encrypt production certificates when the time comes.
 
-## <a id="bd3ae334a9689684121c98cc58fd5750"></a>Adding new domains without downtime
+[Back to top](#0)
 
-### <a id="26fc80a8473e501027bfd6d8e774a62d"></a>Step 1 - Create new DNS records
+## <a id="3"></a>Adding new domains without downtime
+
+### <a id="3-1"></a>Step 1 - Create new DNS records
 
 Create DNS A or AAAA record, or both.
 Also, create CNAME record for `www` subdomain if needed.
@@ -213,11 +217,11 @@ Also, create CNAME record for `www` subdomain if needed.
 | AAAA  | `c.evgeniy-khyst.com`     | directs to IPv6 address              |
 | CNAME | `www.c.evgeniy-khyst.com` | is an alias of `c.evgeniy-khyst.com` |
 
-### <a id="57c073bed3e25df087a43db30090819a"></a>Step 2 - Copy static content or define upstream service
+### <a id="3-2"></a>Step 2 - Copy static content or define upstream service
 
-Repeat the actions described in the [subsection of the same name in the "Initial setup" section](#ef4ad5646a9d2e1f6fd1bbbf55ef278e).
+Repeat the actions described in [the subsection of the same name in the "Initial setup" section](#2-3).
 
-### <a id="52187f842989030546941fc5e6bf8b96"></a>Step 3 - Update the configuration using the CLI tool
+### <a id="3-3"></a>Step 3 - Update the configuration using the CLI tool
 
 Run the CLI tool, choose `Add new domains` and follow the instructions.
 
@@ -225,11 +229,13 @@ Run the CLI tool, choose `Add new domains` and follow the instructions.
 docker compose run --rm cli
 ```
 
-### <a id="ef5e718a6533a9cbacecbfc090a1fd3f"></a>Step 4 - Verify that HTTPS works
+### <a id="3-4"></a>Step 4 - Verify that HTTPS works
 
 For each new domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
 
-## <a id="e17bbf60a7959ee0aeb00254bcc5f2f7"></a>Removing existing domains without downtime
+[Back to top](#0)
+
+## <a id="4"></a>Removing existing domains without downtime
 
 Run the CLI tool, choose `Remove existing domains` and follow the instructions.
 
@@ -237,7 +243,9 @@ Run the CLI tool, choose `Remove existing domains` and follow the instructions.
 docker compose run --rm cli
 ```
 
-## <a id="1c9c317c41bc07f2bbc0d79f868482a5"></a>Manually renewing all Let's Encrypt certificates
+[Back to top](#0)
+
+## <a id="5"></a>Manually renewing all Let's Encrypt certificates
 
 You can manually renew all of your certificates.
 
@@ -251,7 +259,9 @@ Run the CLI tool, choose `Manually renew all Let's Encrypt certificates (force r
 docker compose run --rm cli
 ```
 
-## <a id="b879ea2c4367eac8be407f516c2a7e8d"></a>Running on a local machine not directed to by DNS records
+[Back to top](#0)
+
+## <a id="6"></a>Running on a local machine not directed to by DNS records
 
 Running Certbot on a local machine not directed to by DNS records makes no sense
 because Let’s Encrypt servers will fail to validate that you control the domain names in the certificate.
@@ -259,13 +269,13 @@ because Let’s Encrypt servers will fail to validate that you control the domai
 But it may be useful to run all services locally with disabled Certbot.
 It is possible in dry run mode.
 
-### <a id="ef749984c45138b34638df669ff9c1f1"></a>Step 1 - Perform an initial setup using the CLI tool
+### <a id="6-1"></a>Step 1 - Perform an initial setup using the CLI tool
 
 ```bash
 docker compose run --rm cli
 ```
 
-### <a id="a62de837fdc7d81a2ab336edb62497f3"></a>Step 2 - Start the services in dry run mode
+### <a id="6-2"></a>Step 2 - Start the services in dry run mode
 
 Enable dry run mode by setting the environment variable `DRY_RUN=true`.
 
@@ -273,7 +283,9 @@ Enable dry run mode by setting the environment variable `DRY_RUN=true`.
 DRY_RUN=true docker compose up -d
 ```
 
-## <a id="2f76e2a844c9521949ed6083ed96655b"></a>Advanced Nginx configuration
+[Back to top](#0)
+
+## <a id="7"></a>Advanced Nginx configuration
 
 You can configure Nginx by manually editing the `nginx-conf/nginx.conf`.
 
@@ -296,7 +308,9 @@ After editing the Nginx configuration, do a hot reload of the Nginx configuratio
 docker compose exec --no-TTY nginx nginx -s reload
 ```
 
-## <a id="f9987558925ac3a1ca42e184e10d7b73"></a>SSL configuration for A+ rating
+[Back to top](#0)
+
+## <a id="8"></a>SSL configuration for A+ rating
 
 SSL in Nginx is configured accoring to best practices to get A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/).
 
@@ -304,3 +318,5 @@ Read more about the best practices and rating:
 
 - https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
 - https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
+
+[Back to top](#0)
