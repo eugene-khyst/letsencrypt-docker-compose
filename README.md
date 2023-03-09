@@ -132,7 +132,7 @@ docker compose run --rm cli
 On the first run, choose to obtain a test certificate from a Let's Encrypt staging server.
 We will switch to a Let's Encrypt production environment after verifying that HTTPS is working with the test certificate.
 
-![letsencrypt-docker-compose CLI initial setup](https://raw.githubusercontent.com/evgeniy-khist/letsencrypt-docker-compose/main/examples/initial-setup.svg)
+![letsencrypt-docker-compose CLI initial setup](examples/initial-setup.svg)
 
 ### <a id="2-5"></a>Step 4 - Start the services
 
@@ -181,8 +181,7 @@ Run the CLI tool, choose `Switch to a Let's Encrypt production environment` and 
 docker compose run --rm cli
 ```
 
-![letsencrypt-docker-compose CLI switch to a Let's Encrypt production environment
-](https://raw.githubusercontent.com/evgeniy-khist/letsencrypt-docker-compose/main/examples/switch-to-prod-env.svg)
+![letsencrypt-docker-compose CLI switch to a Let's Encrypt production environment](examples/switch-to-prod-env.svg)
 
 ### <a id="2-8"></a>Step 7 - Verify that HTTPS works with the production certificates
 
