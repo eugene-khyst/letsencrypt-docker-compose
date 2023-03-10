@@ -4,8 +4,13 @@ services:
   cli:
     build: ./cli
     image: evgeniy-khyst/letsencrypt-docker-compose-cli
+    user: ${CURRENT_USER}
+    group_add:
+      - ${DOCKER_GROUP}
     environment:
       - COMPOSE_PROJECT_NAME
+      - CURRENT_USER
+      - DOCKER_GROUP
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./:/workdir
@@ -46,7 +51,11 @@ services:
       - letsencrypt_certs:/etc/letsencrypt
       - certbot_acme_challenge:/var/www/certbot
     healthcheck:
-      test: ["CMD", "sh", "-c", 'test -n "$(ls -A /etc/letsencrypt/live/)"']
+      test:
+        [
+          "CMD-SHELL",
+          'test -n "$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1',
+        ]
       interval: 30s
       timeout: 30s
       start_period: 30s
