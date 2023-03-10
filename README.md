@@ -7,6 +7,8 @@
   - [Step 2 - Copy static content or define upstream service](#2-3)
     - [Static content](#2-3-1)
     - [Reverse proxy](#2-3-2)
+      - [Single Docker Compose project](#2-3-2-1)
+      - [Multiple Docker Compose projects](#2-3-2-2)
   - [Step 3 - Perform an initial setup using the CLI tool](#2-4)
   - [Step 4 - Start the services](#2-5)
   - [Step 5 - Verify that HTTPS works with the test certificates](#2-6)
@@ -110,7 +112,9 @@ cp -R ./examples/html/ ./html/a.evgeniy-khyst.com
 
 #### <a id="2-3-2"></a>Reverse proxy
 
-The `docker-compose.yml` contains the `example-backend` service.
+##### <a id="2-3-2-1"></a>Single Docker Compose project
+
+The [`docker-compose.yml`](docker-compose.yml) contains the `example-backend` service.
 It's a simple Node.js web app listening on port 8080.
 Replace it with your backend service or remove it.
 
@@ -120,6 +124,31 @@ services:
     build: ./examples/nodejs-backend
     image: evgeniy-khyst/expressjs-helloworld
     restart: unless-stopped
+```
+
+##### <a id="2-3-2-2"></a>Multiple Docker Compose projects
+
+If your upstream server is defined in the YAML file of another Docker Compose project,
+configure it to join the `letsencrypt-docker-compose_default` network created by this project,
+so Nginx is able to forward requests to the upstream service.
+
+Define a reference to the `letsencrypt-docker-compose_default` network in your other YAML file.
+
+```yaml
+version: "3"
+
+services:
+  example-backend:
+    build: ./examples/nodejs-backend
+    image: evgeniy-khyst/expressjs-helloworld
+    networks:
+      - letsencrypt-docker-compose
+    restart: unless-stopped
+
+networks:
+  letsencrypt-docker-compose:
+    name: letsencrypt-docker-compose_default
+    external: true
 ```
 
 ### <a id="2-4"></a>Step 3 - Perform an initial setup using the CLI tool
@@ -312,7 +341,7 @@ Manual edits of the `nginx-conf/nginx.conf` and `nginx-conf/conf.d/${domain}.con
 (e.g., adding or removing domains or switching to a Let's Encrypt production environment).
 
 The CLI tool generates the Nginx configuration files based on the `config.json`.
-To make Nginx configuration changes persistent, edit the Handlebars templates used for their generation
+To make Nginx configuration changes persistent, also edit the Handlebars templates used for their generation
 
 - [`templates/nginx.conf.hbs`](templates/nginx.conf.hbs),
 - [`templates/servers.conf.hbs`](templates/servers.conf.hbs).
