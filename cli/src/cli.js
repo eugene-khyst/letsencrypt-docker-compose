@@ -14,6 +14,8 @@ import {
   execForceRenewCertbotCertificate,
 } from './shell-commands.js';
 
+const dockerDnsResolver = '127.0.0.11';
+
 const askDomain = async (config, domainName) => {
   const domainConfig =
     (domainName &&
@@ -82,9 +84,12 @@ const askDomain = async (config, domainName) => {
     const reverseProxyQuestions = [
       {
         type: 'confirm',
-        name: 'dnsResolver',
-        message: 'Proxy to a server defined in the same docker-compose.yml?',
-        default: domainConfig.dnsResolver ?? true,
+        name: 'dockerDns',
+        message:
+          'Does the upstream server run as a Docker container on the same host?',
+        default: domainConfig.dnsResolver
+          ? domainConfig.dnsResolver === dockerDnsResolver
+          : true,
       },
       {
         type: 'input',
@@ -101,13 +106,13 @@ const askDomain = async (config, domainName) => {
       },
     ];
 
-    const { upstream, dnsResolver } = await inquirer.prompt(
+    const { upstream, dockerDns } = await inquirer.prompt(
       reverseProxyQuestions
     );
 
     Object.assign(domainConfig, {
       upstream,
-      ...(dnsResolver ? { dnsResolver: '127.0.0.11' } : {}),
+      ...(dockerDns ? { dnsResolver: dockerDnsResolver } : {}),
     });
   } else {
     delete domainConfig.upstream;
