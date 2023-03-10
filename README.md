@@ -308,6 +308,15 @@ After editing the Nginx configuration, do a hot reload of the Nginx configuratio
 docker compose exec --no-TTY nginx nginx -s reload
 ```
 
+Manual edits of the `nginx-conf/nginx.conf` and `nginx-conf/conf.d/${domain}.conf` are lost after running the CLI tool
+(e.g., adding or removing domains or switching to a Let's Encrypt production environment).
+
+The CLI tool generates the Nginx configuration files based on the `config.json`.
+To make Nginx configuration changes persistent, edit the Handlebars templates used for their generation
+
+- [`templates/nginx.conf.hbs`](templates/nginx.conf.hbs),
+- [`templates/servers.conf.hbs`](templates/servers.conf.hbs).
+
 [Back to top](#0)
 
 ## <a id="8"></a>Running Docker containers as a non-root user
@@ -338,6 +347,8 @@ Run the CLI tool specifying the current user and `docker` group to make it creat
 ```bash
 CURRENT_USER="$(id -u):$(id -g)" DOCKER_GROUP="$(getent group docker | cut -d: -f3)" docker compose run --rm cli
 ```
+
+[Back to top](#0)
 
 ## <a id="9"></a>SSL configuration for A+ rating
 
