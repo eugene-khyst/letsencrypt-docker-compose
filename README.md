@@ -23,7 +23,8 @@
   - [Step 1 - Perform an initial setup using the CLI tool](#6-1)
   - [Step 2 - Start the services in dry run mode](#6-2)
 - [Advanced Nginx configuration](#7)
-- [SSL configuration for A+ rating](#8)
+- [Running Docker containers as a non-root user](#8)
+- [SSL configuration for A+ rating](#9)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
@@ -309,7 +310,36 @@ docker compose exec --no-TTY nginx nginx -s reload
 
 [Back to top](#0)
 
-## <a id="8"></a>SSL configuration for A+ rating
+## <a id="8"></a>Running Docker containers as a non-root user
+
+By default, Docker is only accessible with root privileges (`sudo`).
+
+The CLI tool creates the following files in the hosts' project root directory mounted into the container:
+
+- `config.json`,
+- `nginx-conf/nginx.conf`,
+- `nginx-conf/conf.d/${domain}.conf`.
+
+These files will be owned by the `root` user.
+When non-root users try to clean up or edit these files, they get the "permission denied" error.
+
+If you want to use Docker as a regular user, you need to [add your user to the `docker` group](https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user).
+
+To make the CLI tool create files in a way that allows non-root users to edit and delete them,
+tell Docker Compose to run as the current user instead of `root`.
+
+As the CLI tool runs Docker Compose commands internally, specify the `docker` group as a supplementary group,
+so the user inside the container will be its member.
+
+We have to use user IDs and group IDs because containers don't know their associated usernames and group names.
+
+Run the CLI tool specifying the current user and `docker` group to make it create files owned by the current user.
+
+```bash
+CURRENT_USER="$(id -u):$(id -g)" DOCKER_GROUP="$(getent group docker | cut -d: -f3)" docker compose run --rm cli
+```
+
+## <a id="9"></a>SSL configuration for A+ rating
 
 SSL in Nginx is configured accoring to best practices to get A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/).
 
