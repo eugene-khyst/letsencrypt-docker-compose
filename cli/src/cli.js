@@ -104,19 +104,28 @@ const askDomain = async (config, domainName) => {
           throw Error('Please provide a valid host.');
         },
       },
+      {
+        type: 'confirm',
+        name: 'websockets',
+        message:
+          'Do you want to proxy websocket connections as well?',
+        default: true
+      },
     ];
 
-    const { upstream, dockerDns } = await inquirer.prompt(
+    const { upstream, dockerDns, websockets } = await inquirer.prompt(
       reverseProxyQuestions
     );
 
     Object.assign(domainConfig, {
       upstream,
       ...(dockerDns ? { dnsResolver: dockerDnsResolver } : {}),
+      websockets,
     });
   } else {
     delete domainConfig.upstream;
     delete domainConfig.dnsResolver;
+    delete domainConfig.websockets;
   }
 
   if (!domainName) {
