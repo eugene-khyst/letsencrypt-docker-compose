@@ -54,7 +54,7 @@ services:
       test:
         [
           "CMD-SHELL",
-          'test -n "$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1',
+          'test -n "$$(ls -A /etc/letsencrypt/live/)" || test "$$DRY_RUN" == "true" || exit 1',
         ]
       interval: 30s
       timeout: 30s
