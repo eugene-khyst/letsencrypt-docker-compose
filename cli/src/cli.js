@@ -107,24 +107,26 @@ const askDomain = async (config, domainName) => {
       {
         type: 'confirm',
         name: 'websockets',
-        message:
-          'Do you want to proxy websocket connections as well?',
-        default: true
+        message: 'Enable WebSocket proxying?',
+        default: domainConfig.websockets ?? false,
       },
     ];
 
-    const { upstream, dockerDns, websockets } = await inquirer.prompt(
+    const { dockerDns, upstream, websockets } = await inquirer.prompt(
       reverseProxyQuestions
     );
 
-    Object.assign(domainConfig, {
-      upstream,
-      ...(dockerDns ? { dnsResolver: dockerDnsResolver } : {}),
-      websockets,
-    });
+    Object.assign(
+      domainConfig,
+      {
+        upstream,
+        websockets,
+      },
+      dockerDns ? { dnsResolver: dockerDnsResolver } : {}
+    );
   } else {
-    delete domainConfig.upstream;
     delete domainConfig.dnsResolver;
+    delete domainConfig.upstream;
     delete domainConfig.websockets;
   }
 
@@ -192,7 +194,7 @@ const askNginxConfig = async (config) => {
   Object.assign(config, answers);
 };
 
-const askConfim = async () => {
+const askConfirm = async () => {
   const questions = [
     {
       type: 'confirm',
@@ -214,7 +216,7 @@ const writeConfigFiles = async (config) => {
 const initConfig = async (config) => {
   await askDomain(config);
   await askNginxConfig(config);
-  if (await askConfim()) {
+  if (await askConfirm()) {
     await writeConfigFiles(config);
   }
 };
@@ -228,7 +230,7 @@ const obtainProductionCertificates = async (config) => {
 
   domainConfig.testCert = false;
 
-  if (await askConfim()) {
+  if (await askConfirm()) {
     await writeConfigFiles(config);
     await execDeleteCertbotCertificate(domainName);
     await execConfigNginx(); // Use dummy certificate
@@ -239,7 +241,7 @@ const obtainProductionCertificates = async (config) => {
 
 const addDomains = async (config) => {
   await askDomain(config);
-  if (await askConfim()) {
+  if (await askConfirm()) {
     await writeConfigFiles(config);
     await execConfigNginx(); // Use dummy certificate
     await execCertbotCertonly(); // Obtain Let's Encrypt certificate
@@ -255,7 +257,7 @@ const removeDomains = async (config) => {
 
   config.domains.splice(index, 1);
 
-  if (await askConfim()) {
+  if (await askConfirm()) {
     await writeConfigFiles(config);
     await deleteNginxConfigFile(domainName);
     await execNginxReload();
@@ -264,8 +266,14 @@ const removeDomains = async (config) => {
 };
 
 const forceRenewCertificates = async () => {
-  if (await askConfim()) {
+  if (await askConfirm()) {
     await execForceRenewCertbotCertificate();
+    await execNginxReload();
+  }
+};
+
+const reloadNginxConfiguration = async () => {
+  if (await askConfirm()) {
     await execNginxReload();
   }
 };
@@ -312,6 +320,10 @@ const askConfig = async () => {
             name: "Manually renew all Let's Encrypt certificates (force renewal)",
             value: 'forceRenewCertificates',
           },
+          {
+            name: 'Reload Nginx configuration without downtime',
+            value: 'reloadNginxConfiguration',
+          },
         ],
       },
     ];
@@ -323,6 +335,7 @@ const askConfig = async () => {
       addDomains,
       removeDomains,
       forceRenewCertificates,
+      reloadNginxConfiguration,
     };
 
     await commands[command](config);
