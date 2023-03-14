@@ -36,7 +36,8 @@ Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
 
 This example automatically obtains and renews [Let's Encrypt](https://letsencrypt.org/) free SSL/TLS certificates and sets up HTTPS in Nginx for multiple domain names using Docker Compose.
 
-You can run Nginx with IPv4, IPv6, HTTP/1.1, and HTTP/2 support and set up HTTPS with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and _letsencrypt-docker-compose_ interactive CLI tool.
+You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and _letsencrypt-docker-compose_ interactive CLI tool.
+Nginx is configured to support IPv4, IPv6, HTTP/1.1, HTTP/2, and optionally, WebSocket.
 
 Let's Encrypt is a certificate authority that provides free X.509 certificates for TLS encryption.
 The certificates are valid for 90 days and can be renewed. Both initial creation and renewal can be automated using [Certbot](https://certbot.eff.org/).
@@ -116,6 +117,8 @@ cp -R ./examples/html/ ./html/a.evgeniy-khyst.com
 
 The [`docker-compose.yml`](docker-compose.yml) contains the `example-backend` service.
 It's a simple Node.js web app listening on port 8080.
+It has `/hello?name={name}` REST endpoint and WebSocket echo server sending back the request sent by the client.
+
 Replace it with your backend service or remove it.
 
 ```yaml
@@ -156,6 +159,12 @@ networks:
 Run the CLI tool and follow the instructions to perform an initial setup.
 
 ```bash
+./cli.sh config
+```
+
+or
+
+```bash
 docker compose run --rm cli
 ```
 
@@ -166,13 +175,25 @@ We will switch to a Let's Encrypt production environment after verifying that HT
 
 ### <a id="2-5"></a>Step 4 - Start the services
 
-On the first run, build the services.
+If you've made any changes to the Docker images, rebuild the services.
+
+```bash
+./cli.sh build
+```
+
+or
 
 ```bash
 docker compose build
 ```
 
 Start the services.
+
+```bash
+./cli.sh up
+```
+
+or
 
 ```bash
 docker compose up -d
@@ -193,7 +214,7 @@ Reloading Nginx configuration
 
 ### <a id="2-6"></a>Step 5 - Verify that HTTPS works with the test certificates
 
-For each domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
+For each domain, check `https://${domain}` and `https://www.${domain}` if you've configured the `www` subdomain.
 Certificates issued by `(STAGING) Let's Encrypt` are considered not secure by browsers and cURL.
 
 ```bash
@@ -203,9 +224,21 @@ curl --insecure https://b.evgeniy-khyst.com/hello?name=Eugene
 curl --insecure https://www.b.evgeniy-khyst.com/hello?name=Eugene
 ```
 
+If you've set up WebSocket, check it using the [wscat](https://github.com/websockets/wscat) tool.
+
+```bash
+wscat --no-check --connect wss://b.evgeniy-khyst.com/echo
+```
+
 ### <a id="2-7"></a>Step 6 - Switch to a Let's Encrypt production environment
 
 Run the CLI tool, choose `Switch to a Let's Encrypt production environment` and follow the instructions.
+
+```bash
+./cli.sh config
+```
+
+or
 
 ```bash
 docker compose run --rm cli
@@ -215,7 +248,7 @@ docker compose run --rm cli
 
 ### <a id="2-8"></a>Step 7 - Verify that HTTPS works with the production certificates
 
-For each domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
+For each domain, check `https://${domain}` and `https://www.${domain}` if you've configured the `www` subdomain.
 Certificates issued by `Let's Encrypt` are considered secure by browsers and cURL.
 
 ```bash
@@ -223,6 +256,12 @@ curl https://a.evgeniy-khyst.com
 curl https://www.a.evgeniy-khyst.com
 curl https://b.evgeniy-khyst.com/hello?name=Eugene
 curl https://www.b.evgeniy-khyst.com/hello?name=Eugene
+```
+
+If you've set up WebSocket, check it using the [wscat](https://github.com/websockets/wscat) tool.
+
+```bash
+wscat --connect wss://b.evgeniy-khyst.com/echo
 ```
 
 Optionally check your domains with [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) and review the SSL Reports.
@@ -255,18 +294,30 @@ Repeat the actions described in [the subsection of the same name in the "Initial
 Run the CLI tool, choose `Add new domains` and follow the instructions.
 
 ```bash
+./cli.sh config
+```
+
+or
+
+```bash
 docker compose run --rm cli
 ```
 
 ### <a id="3-4"></a>Step 4 - Verify that HTTPS works
 
-For each new domain, check `https://${domain}` and `https://www.${domain}` if you configured the `www` subdomain.
+For each new domain, check `https://${domain}` and `https://www.${domain}` if you've configured the `www` subdomain.
 
 [Back to top](#0)
 
 ## <a id="4"></a>Removing existing domains without downtime
 
 Run the CLI tool, choose `Remove existing domains` and follow the instructions.
+
+```bash
+./cli.sh config
+```
+
+or
 
 ```bash
 docker compose run --rm cli
@@ -285,6 +336,12 @@ This operation is not appropriate to run daily because each certificate will be 
 Run the CLI tool, choose `Manually renew all Let's Encrypt certificates (force renewal)` and follow the instructions.
 
 ```bash
+./cli.sh config
+```
+
+or
+
+```bash
 docker compose run --rm cli
 ```
 
@@ -301,12 +358,22 @@ It is possible in dry run mode.
 ### <a id="6-1"></a>Step 1 - Perform an initial setup using the CLI tool
 
 ```bash
+./cli.sh config
+```
+
+or
+
+```bash
 docker compose run --rm cli
 ```
 
 ### <a id="6-2"></a>Step 2 - Start the services in dry run mode
 
-Enable dry run mode by setting the environment variable `DRY_RUN=true`.
+```bash
+./cli.sh up --dry-run
+```
+
+Alternatively, you can enable dry run mode using the environment variable `DRY_RUN=true`.
 
 ```bash
 DRY_RUN=true docker compose up -d
@@ -332,9 +399,16 @@ upstream backend {
 ```
 
 After editing the Nginx configuration, do a hot reload of the Nginx configuration.
+Run the CLI tool and choose `Reload Nginx configuration without downtime`.
 
 ```bash
-docker compose exec --no-TTY nginx nginx -s reload
+./cli.sh config
+```
+
+or
+
+```bash
+docker compose run --rm cli
 ```
 
 Manual edits of the `nginx-conf/nginx.conf` and `nginx-conf/conf.d/${domain}.conf` are lost after running the CLI tool
@@ -345,6 +419,14 @@ To make Nginx configuration changes persistent, also edit the Handlebars templat
 
 - [`templates/nginx.conf.hbs`](templates/nginx.conf.hbs),
 - [`templates/servers.conf.hbs`](templates/servers.conf.hbs).
+
+To add domain-specific configuration to a template use the [`ifEquals` Handlebars helper](cli/src/handlebars-helpers.js).
+
+```hbs
+{{#ifEquals domain "a.evgeniy-khyst.com"}}
+  # Configuration for a specific domain
+{{/ifEquals}}
+```
 
 [Back to top](#0)
 
@@ -375,6 +457,18 @@ Run the CLI tool specifying the current user and `docker` group to make it creat
 
 ```bash
 CURRENT_USER="$(id -u):$(id -g)" DOCKER_GROUP="$(getent group docker | cut -d: -f3)" docker compose run --rm cli
+```
+
+The convenience script `cli.sh` runs the CLI tool as the current user by default.
+
+```bash
+./cli.sh config
+```
+
+You can run the CLI tool as UID/GID 0 instead of the current user with the option `--no-current-user`.
+
+```bash
+./cli.sh config --no-current-user
 ```
 
 [Back to top](#0)

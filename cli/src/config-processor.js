@@ -1,5 +1,8 @@
 import * as fs from 'fs/promises';
 import Handlebars from 'handlebars';
+import registerHelpers from './handlebars-helpers.js';
+
+registerHelpers(Handlebars);
 
 const configPath = './config.json';
 const templatesDir = './templates';

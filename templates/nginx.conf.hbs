@@ -31,5 +31,10 @@ http {
     include /etc/nginx/conf.d/includes/gzip.conf;
     {{/if}}
 
+    map $http_upgrade $connection_upgrade {
+        default upgrade;
+        '' close;
+    }
+
     include /etc/nginx/conf.d/*.conf;
 }
