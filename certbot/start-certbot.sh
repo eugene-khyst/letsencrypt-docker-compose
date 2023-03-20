@@ -2,4 +2,4 @@
 
 source ./certbot-certonly.sh
 
-tail -F /var/log/letsencrypt/letsencrypt.log
+sleep infinity & wait $!

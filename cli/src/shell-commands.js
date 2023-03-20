@@ -45,12 +45,12 @@ export const execCertbotCertonly = async () => {
 
 export const execDeleteCertbotCertificate = async (domainName) => {
   await runCommand(
-    `docker compose exec --no-TTY certbot certbot --noninteractive delete --cert-name ${domainName}`
+    `docker compose exec --no-TTY certbot /letsencrypt-docker-compose/certbot-delete.sh ${domainName}`
   );
 };
 
 export const execForceRenewCertbotCertificate = async () => {
   await runCommand(
-    'docker compose exec --no-TTY certbot certbot renew --no-random-sleep-on-renew --force-renew'
+    'docker compose exec --no-TTY certbot /letsencrypt-docker-compose/certbot-force-renew.sh'
   );
 };
