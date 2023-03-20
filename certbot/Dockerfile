@@ -4,8 +4,8 @@ RUN apk add --no-cache jq
 
 WORKDIR /letsencrypt-docker-compose
 
-COPY certbot-certonly.sh start-certbot.sh ./
-RUN chmod +x certbot-certonly.sh start-certbot.sh
+COPY start-certbot.sh certbot-certonly.sh certbot-delete.sh certbot-force-renew.sh ./
+RUN chmod +x start-certbot.sh certbot-certonly.sh certbot-delete.sh certbot-force-renew.sh
 
 ENTRYPOINT []
 CMD ["/letsencrypt-docker-compose/start-certbot.sh"]
