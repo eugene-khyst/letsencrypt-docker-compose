@@ -199,6 +199,9 @@ or
 docker compose up -d
 ```
 
+All Docker images used in the project are multi-platform and support `amd64`, `arm32v6`, and `arm64v8` architectures.
+For example, when running the project on an `x86_64`/`amd64` machine, the `amd64` variants are pulled and run.
+
 Check the logs.
 
 ```bash
