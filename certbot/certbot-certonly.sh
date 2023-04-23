@@ -34,11 +34,15 @@ for domain in $domains; do
   if [ "$www_subdomain" = "true" ]; then
     www_subdomain_arg="-d www.${domain}"
     echo "A 'www' subdomain enabled"
+  else
+    www_subdomain_arg=""
   fi
 
   if [ "$test_cert" = "true" ]; then
     test_cert_arg="--test-cert"
     echo "Testing on staging environment enabled"
+  else
+    test_cert_arg=""
   fi
 
   if [ -z "$email" ]; then
