@@ -29,6 +29,13 @@ server {
     resolver {{dnsResolver}};
     {{/if}}
 
+{{#*inline "staticContent"}}
+location / {
+    root /var/www/html/{{domain}};
+    index index.html index.htm;
+}
+{{/inline}}
+
 {{#*inline "reverseProxy"}}
 location / {
     proxy_set_header Host $host;
@@ -53,10 +60,27 @@ location / {
 }
 {{/inline}}
 
-{{#*inline "staticContent"}}
+{{#*inline "phpFpm"}}
+root /var/www/html/{{domain}};
+
 location / {
-    root /var/www/html/{{domain}};
-    index index.html index.htm;
+    index index.php index.html index.htm;
+}
+
+location ~ [^/]\.php(/|$) {
+    fastcgi_split_path_info ^(.+?\.php)(/.*)$;
+    if (!-f $document_root$fastcgi_script_name) {
+        return 404;
+    }
+
+    fastcgi_param HTTP_PROXY "";
+
+    fastcgi_pass php-fpm:9000;
+    fastcgi_index index.php;
+
+    include fastcgi_params;
+
+    fastcgi_param  SCRIPT_FILENAME   $document_root$fastcgi_script_name;
 }
 {{/inline}}
 
