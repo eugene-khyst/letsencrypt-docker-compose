@@ -70,8 +70,9 @@ const askDomain = async (config, domainName) => {
       name: 'requestHandler',
       message: 'How do you want to configure Nginx?',
       choices: [
-        { name: 'To serve static content', value: 'staticContent' },
-        { name: 'As a reverse proxy', value: 'reverseProxy' },
+        { name: 'Serving static content', value: 'staticContent' },
+        { name: 'Reverse proxy', value: 'reverseProxy' },
+        { name: 'PHP-FPM', value: 'phpFpm' },
       ],
     },
   ];
