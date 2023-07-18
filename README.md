@@ -29,6 +29,7 @@
 - [Advanced Nginx configuration](#8)
 - [Running Docker containers as a non-root user](#9)
 - [SSL configuration for A+ rating](#10)
+- [Troubleshooting](#11)
 
 <!-- Table of contents is made with https://github.com/evgeniy-khist/markdown-toc -->
 
@@ -36,7 +37,7 @@
 
 Set up Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
 
-This repository contains a Docker Compose project, which automatically obtains and renews free Let's Encrypt SSL/TLS certificates 
+This repository contains a Docker Compose project, which automatically obtains and renews free Let's Encrypt SSL/TLS certificates
 and sets up HTTPS in Nginx for multiple domain names and a simple CLI configuration management tool.
 
 You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and _letsencrypt-docker-compose_ interactive CLI tool.
@@ -519,5 +520,50 @@ Read more about the best practices and rating:
 
 - https://github.com/ssllabs/research/wiki/SSL-and-TLS-Deployment-Best-Practices
 - https://github.com/ssllabs/research/wiki/SSL-Server-Rating-Guide
+
+[Back to top](#0)
+
+## <a id="11"></a>Troubleshooting
+
+If the `certbot` service fails to start (the container is unhealthy), check the logs: `docker compose logs certbot`.
+
+If the Certbot logs contain messages `Certbot failed to authenticate some domains (authenticator: webroot)`
+and `Timeout during connect (likely firewall problem)`,
+this means that the Let's Encrypt servers can't connect to your server to pass [HTTP-01 challenge](https://letsencrypt.org/docs/challenge-types/#http-01-challenge).
+
+1. Double-check your DNS and firewall configurtions.
+
+2. Run the project in dry run mode (without actually running Certbot):
+
+   ```bash
+   ./cli.sh up --dry-run
+   ```
+
+3. Specify your domain:
+
+   ```bash
+   domain=your.domain.com
+   ```
+
+4. Create a file that will emulate an HTTP-01 challenge:
+
+   ```bash
+   docker compose exec certbot mkdir -p /var/www/certbot/${domain}/.well-known/acme-challenge/
+   docker compose exec certbot sh -c "echo $(date) > /var/www/certbot/${domain}/.well-known/acme-challenge/test-token.txt"
+   ```
+
+5. Make sure the file has been created:
+
+   ```bash
+   docker compose exec certbot cat /var/www/certbot/${domain}/.well-known/acme-challenge/test-token.txt
+   ```
+
+6. Make sure Nginx is serving a file emulating an HTTP-01 challenge:
+
+   ```bash
+   curl http://${domain}/.well-known/acme-challenge/test-token.txt
+   ```
+
+   The output of the `curl` command should match the contents of the `test-token.txt` file.
 
 [Back to top](#0)
