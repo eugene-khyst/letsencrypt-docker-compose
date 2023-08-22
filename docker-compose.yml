@@ -86,10 +86,10 @@ services:
       - ./html:/var/www/html:ro
 
   # Replace with your backend image or remove
-  example-backend:
-    build: ./examples/nodejs-backend
-    image: evgeniy-khyst/expressjs-helloworld
-    restart: unless-stopped
+  # example-backend:
+  #   build: ./examples/nodejs-backend
+  #   image: evgeniy-khyst/expressjs-helloworld
+  #   restart: unless-stopped
 
 volumes:
   nginx_conf_ssl:
