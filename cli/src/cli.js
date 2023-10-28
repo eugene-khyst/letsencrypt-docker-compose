@@ -209,10 +209,12 @@ const askConfirm = async () => {
   return confirm;
 };
 
-const writeConfigFiles = async (config) => {
+const writeConfigFiles = async (config, domainNames) => {
   await writeConfig(config);
-  await writeNginxConfigFiles(config);
+  await writeNginxConfigFiles(config, domainNames);
 };
+
+const getDomainNames = (config) => config.domains.map(({ domain }) => domain);
 
 const initConfig = async (config) => {
   await askDomain(config);
@@ -232,7 +234,7 @@ const obtainProductionCertificates = async (config) => {
   domainConfig.testCert = false;
 
   if (await askConfirm()) {
-    await writeConfigFiles(config);
+    await writeConfigFiles(config, [domainName]);
     await execDeleteCertbotCertificate(domainName);
     await execConfigNginx(); // Use dummy certificate
     await execCertbotCertonly(); // Obtain Let's Encrypt certificate
@@ -241,9 +243,14 @@ const obtainProductionCertificates = async (config) => {
 };
 
 const addDomains = async (config) => {
+  const domainNamesBefore = getDomainNames(config);
   await askDomain(config);
+  const domainNamesAfter = getDomainNames(config);
+  const addedDomainNames = domainNamesAfter.filter(
+    (domainName) => !domainNamesBefore.includes(domainName)
+  );
   if (await askConfirm()) {
-    await writeConfigFiles(config);
+    await writeConfigFiles(config, addedDomainNames);
     await execConfigNginx(); // Use dummy certificate
     await execCertbotCertonly(); // Obtain Let's Encrypt certificate
     await execConfigNginx(); // Use Let's Encrypt certificate
@@ -259,7 +266,7 @@ const removeDomains = async (config) => {
   config.domains.splice(index, 1);
 
   if (await askConfirm()) {
-    await writeConfigFiles(config);
+    await writeConfigFiles(config, []);
     await deleteNginxConfigFile(domainName);
     await execNginxReload();
     await execDeleteCertbotCertificate(domainName);

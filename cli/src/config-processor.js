@@ -41,18 +41,20 @@ const writeNginxConfigFile = async (configFilename, content) => {
   await fs.writeFile(nginxConfigPath, content);
 };
 
-export const writeNginxConfigFiles = async (config) => {
+export const writeNginxConfigFiles = async (config, domainNames) => {
   const nginxConfTemplate = await compileTemplate('nginx.conf.hbs');
   const serverConfTemplate = await compileTemplate('servers.conf.hbs');
 
   await writeNginxConfigFile('nginx.conf', nginxConfTemplate(config));
 
-  const writeServerConfigPromises = config.domains?.map((serverConfig) =>
-    writeNginxConfigFile(
-      `conf.d/${serverConfig.domain}.conf`,
-      serverConfTemplate(serverConfig)
-    )
-  );
+  const writeServerConfigPromises = config.domains
+    ?.filter(({ domain }) => !domainNames || domainNames.includes(domain))
+    .map((serverConfig) =>
+      writeNginxConfigFile(
+        `conf.d/${serverConfig.domain}.conf`,
+        serverConfTemplate(serverConfig)
+      )
+    );
   if (writeServerConfigPromises) {
     await Promise.all(writeServerConfigPromises);
   }
