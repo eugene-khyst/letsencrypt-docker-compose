@@ -37,7 +37,7 @@
 
 Set up Nginx and Let’s Encrypt in less than 3 minutes using Docker Compose and a simple CLI tool.
 
-This repository contains a Docker Compose project and a CLI configuration management tool ещ automatically obtain and renew free Let's Encrypt SSL/TLS certificates
+This repository contains a Docker Compose project and a CLI configuration management tool to automatically obtain and renew free Let's Encrypt SSL/TLS certificates
 and set up HTTPS in Nginx for multiple domain names.
 
 You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with free Let's Encrypt SSL/TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using **letsencrypt-docker-compose**.
