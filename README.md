@@ -40,17 +40,17 @@ Set up Nginx and Let’s Encrypt in less than 3 minutes using Docker Compose and
 This repository contains a Docker Compose project that automatically obtains and renews free Let's Encrypt SSL/TLS certificates
 and sets up HTTPS in Nginx for multiple domain names, and a simple CLI configuration management tool.
 
-You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with Let's Encrypt TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and _letsencrypt-docker-compose_ interactive CLI tool.
+You can run Nginx and set up HTTPS (`https://`) and WebSocket Secure (`wss://`) with Let's Encrypt SSL/TLS certificates for your domain names and get an A+ rating in [SSL Labs SSL Server Test](https://www.ssllabs.com/ssltest/) using Docker Compose and **letsencrypt-docker-compose** interactive CLI tool.
 Nginx is configured to support IPv4, IPv6, HTTP/1.1, HTTP/2, and optionally, WebSocket.
 
 [Let's Encrypt](https://letsencrypt.org/) is a certificate authority that provides free X.509 certificates for TLS encryption.
 The certificates are valid for 90 days and can be renewed. Both initial creation and renewal can be automated using [Certbot](https://certbot.eff.org/).
 
-When using Kubernetes Let's Encrypt TLS certificates can be easily obtained and installed using cloud native certificate management solutions.
+When using Kubernetes Let's Encrypt SSL/TLS certificates can be easily obtained and installed using cloud native certificate management solutions.
 For simple websites and applications, Kubernetes is too much overhead and Docker Compose is more suitable.
-But for Docker Compose there is no such popular and robust tool for TLS certificate management.
+Thus, this project was created to easily manage, install and auto-renew free SSL/TLS certificates.
 
-The project supports separate TLS certificates for multiple domain names.
+The project supports separate SSL/TLS certificates for multiple domain names.
 
 The idea is simple. There are three main services:
 
@@ -62,7 +62,7 @@ and one additional service `cli` for interactive configuration.
 
 The sequence of actions:
 
-1. You perform an initial setup with _letsencrypt-docker-compose_ CLI tool.
+1. You perform an initial setup with **letsencrypt-docker-compose** CLI tool.
 2. Nginx generates self-signed "dummy" certificates to pass ACME challenge for obtaining Let's Encrypt certificates.
 3. Certbot waits for Nginx to become ready and obtains certificates.
 4. Cron triggers Certbot to try to renew certificates and Nginx to reload configuration daily.
