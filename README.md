@@ -48,7 +48,7 @@ The certificates are valid for 90 days and can be renewed. Both initial creation
 
 When using Kubernetes Let's Encrypt SSL/TLS certificates can be easily obtained and installed using cloud native certificate management solutions.
 For simple websites and applications, Kubernetes is too much overhead and Docker Compose is more suitable.
-Thus, this project was created to easily manage, install and auto-renew free SSL/TLS certificates.
+Thus, this project was created to easily manage, install and auto-renew free SSL/TLS certificates with Docker Compose.
 
 The project supports separate SSL/TLS certificates for multiple domain names.
 
