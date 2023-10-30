@@ -35,7 +35,7 @@
 
 ## <a id="1"></a>Overview
 
-Set up Nginx and Let’s Encrypt with Docker Compose in less than 3 minutes.
+Set up Nginx and Let’s Encrypt in less than 3 minutes using Docker Compose and a simple CLI tool.
 
 This repository contains a Docker Compose project, which automatically obtains and renews free Let's Encrypt SSL/TLS certificates
 and sets up HTTPS in Nginx for multiple domain names and a simple CLI configuration management tool.
