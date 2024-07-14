@@ -1,7 +1,8 @@
 # <a id="0"></a>letsencrypt-docker-compose
 
-> **The project has been discontinued.**
-> **Use [linuxserver/docker-swag](https://github.com/linuxserver/docker-swag) instead.**
+> [!IMPORTANT]
+> The project has been discontinued.
+> Use [linuxserver/docker-swag](https://github.com/linuxserver/docker-swag) instead.
 
 - [Overview](#1)
 - [Initial setup](#2)
